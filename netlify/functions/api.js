@@ -39,7 +39,15 @@ function view(c, role) {
     partner_earned_display: money(m.partner_earned, c.currency),
     week_earned_display: money(m.week_earned, c.currency),
     accepted: !!c.partner_accepted,   // has the watcher accepted?
+    // Secret Mode: free 30-day challenge; Day-19 one-time reveal unlocks beyond 30.
+    secret_unlocked: !!c.secret_unlocked,
+    display_streak: c.secret_unlocked ? m.streak : Math.min(m.streak, CAP),
+    streak_cap: c.secret_unlocked ? null : CAP,
+    challenge_complete: !c.secret_unlocked && m.streak >= CAP,
+    hardcore_tier: c.secret_unlocked ? hardcoreTier(m.streak) : null,
   };
+  // The reveal only ever fires for the doer, once, at day 19+, pre-unlock.
+  if (role === "owner") base.secret_reveal = (m.streak >= 19 && !c.secret_unlocked && !c.secret_reveal_shown_at);
   if (role === "owner") {
     base.invite_link = `/c/${c.id}?t=${c.partner_token}`;
     // "Your wife raised your Lazy Tax 🚨" banner: latest watcher change the owner hasn't seen.
@@ -56,6 +64,13 @@ function view(c, role) {
 }
 
 const roleFor = (c, t) => (t && t === c.owner_token ? "owner" : t && t === c.partner_token ? "partner" : null);
+
+const CAP = 30; // free challenge is 30 days; Secret Mode removes the cap
+function hardcoreTier(streak) {
+  if (streak >= 365) return { name: "Lifetime Discipline", emoji: "🔥", next: null };
+  if (streak >= 100) return { name: "Legend", emoji: "🔥", next: 365 };
+  return { name: "Iron", emoji: "🔥", next: 100 };
+}
 
 export default async (req) => {
   const url = new URL(req.url);
@@ -90,6 +105,8 @@ export default async (req) => {
         sessions: {},
         cheers: {},
         penalty_events: [{ amount: penalty, changed_by: "creator", ts: Date.now() }],
+        secret_unlocked: false,
+        secret_reveal_shown_at: null,
         share_count: 0,
         owner_seen: false,
         partner_first_seen: null,
@@ -178,6 +195,23 @@ export default async (req) => {
     if (action === "lazy_tax_ack") {
       if (role !== "owner") return json({ error: "owner only" }, 403);
       c.lazy_tax_ack_ts = Date.now();
+      await store.setJSON(id, c);
+      return json(view(c, role));
+    }
+
+    // ---- secret_seen (the Day-19 reveal is one-time: burn it on view) --
+    if (action === "secret_seen") {
+      if (role !== "owner") return json({ error: "owner only" }, 403);
+      if (!c.secret_reveal_shown_at) { c.secret_reveal_shown_at = Date.now(); await store.setJSON(id, c); }
+      return json(view(c, role));
+    }
+
+    // ---- unlock_secret (enter Secret Mode — free, removes the 30-day cap) --
+    if (action === "unlock_secret") {
+      if (role !== "owner") return json({ error: "owner only" }, 403);
+      c.secret_unlocked = true;
+      c.secret_reveal_shown_at = c.secret_reveal_shown_at || Date.now();
+      c.secret_unlocked_at = Date.now();
       await store.setJSON(id, c);
       return json(view(c, role));
     }

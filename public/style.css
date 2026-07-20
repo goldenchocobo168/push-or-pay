@@ -224,6 +224,22 @@ input:focus, select:focus { border-color: var(--accent); }
 .lk { display: flex; gap: 8px; margin-top: 10px; } .lk input { font-size: 13px; } .copy { flex: 0 0 auto; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 600; }
 .raise { }
 
+/* segmented control (who does the push-ups) */
+.seg { display: flex; gap: 6px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 14px; padding: 5px; margin-bottom: 8px; }
+.seg button { flex: 1; border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 14px; padding: 11px 8px; border-radius: 10px; cursor: pointer; transition: background .15s, color .15s; }
+.seg button.sel { background: var(--accent-2); color: #fff; box-shadow: var(--sh-sm); }
+
+/* Secret Mode — cinematic Day-19 reveal */
+.secret-veil { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(600px 400px at 50% 30%, rgba(139,124,255,.14), #000 70%), #000; animation: fadeUp .6s var(--ease) both; }
+.secret-inner { max-width: 460px; text-align: center; }
+.secret-inner .lock { font-size: 54px; }
+.secret-inner .s-line { color: #c7cdd8; font-size: 17px; margin: 10px 0; }
+.secret-inner .s-big { font-size: 26px; font-weight: 800; margin: 14px 0; }
+.secret-inner .s-warn { color: var(--fire); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; margin: 18px 0 20px; }
+.hero-streak .days .cap { font-size: 24px; font-weight: 700; color: var(--faint); letter-spacing: -.01em; }
+.hero-streak.secret { background: linear-gradient(180deg, rgba(60,30,20,.5), var(--surface)); border-color: rgba(255,138,61,.3); }
+
 /* lazy-tax notification banner */
 .banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left;
   background: linear-gradient(180deg, rgba(60,26,26,.55), var(--surface)); border-color: rgba(255,94,94,.28); }
