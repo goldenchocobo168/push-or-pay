@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Penalty Partner — miss it, they win</title>
+  <meta name="description" content="Turn your loved ones into your accountability partners. Miss a tiny daily habit and they earn the penalty." />
+  <meta property="og:title" content="Penalty Partner" />
+  <meta property="og:description" content="Miss a tiny daily habit and your partner earns the penalty. The best accountability partner is the one who profits when you fail." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand"><span class="logo">🏋️</span> Penalty Partner</div>
+    <p class="tag">Miss your tiny daily habit? Your partner earns the penalty. No login, no real money — just skin in the game.</p>
+
+    <div class="card hero">
+      <div class="big">1 push-up.</div>
+      <div class="sub">Skip it, and your partner is <b>$10</b> richer.</div>
+    </div>
+
+    <div class="card">
+      <h2>Create your challenge</h2>
+      <form id="createForm">
+        <label for="owner">Your name</label>
+        <input id="owner" name="owner" placeholder="Sam" autocomplete="off" required />
+
+        <label for="partner">Accountability partner</label>
+        <input id="partner" name="partner" placeholder="Wife ❤️" autocomplete="off" required />
+
+        <label for="habit">Daily habit</label>
+        <input id="habit" name="habit" value="1 Push-up" autocomplete="off" required />
+
+        <div class="row">
+          <div>
+            <label for="currency">Currency</label>
+            <select id="currency" name="currency">
+              <option>$</option><option>S$</option><option>£</option><option>€</option><option>₹</option>
+            </select>
+          </div>
+          <div>
+            <label for="penalty">Penalty / miss</label>
+            <input id="penalty" name="penalty" type="number" min="1" max="1000" value="10" required />
+          </div>
+        </div>
+
+        <button class="btn" type="submit" id="createBtn">Start challenge →</button>
+        <p class="msg" id="msg"></p>
+      </form>
+    </div>
+
+    <p class="foot">Your habits. Their rewards. 🙂</p>
+  </div>
+
+  <script>
+    const form = document.getElementById("createForm");
+    const btn = document.getElementById("createBtn");
+    const msg = document.getElementById("msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      btn.disabled = true; msg.textContent = "Creating…"; msg.className = "msg";
+      try {
+        const res = await fetch("/api?action=create", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            owner_name: document.getElementById("owner").value,
+            partner_name: document.getElementById("partner").value,
+            habit: document.getElementById("habit").value,
+            penalty: document.getElementById("penalty").value,
+            currency: document.getElementById("currency").value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Something went wrong");
+        window.location.href = data.owner_link;
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = "msg err";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

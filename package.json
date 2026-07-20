@@ -1,0 +1,13 @@
+{
+  "name": "penalty-partner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Turn your loved ones into your accountability partners. Miss a tiny daily habit, they earn the penalty.",
+  "type": "module",
+  "scripts": {
+    "test": "node test/logic.test.mjs && node test/api.test.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
