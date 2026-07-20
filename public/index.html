@@ -4,180 +4,226 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Push or Pay — protect your streak, or your partner profits</title>
-  <meta name="description" content="A tiny game between two people. Do your daily push-ups and protect your streak — miss, and your partner profits. Not a fitness app." />
+  <meta name="description" content="A tiny game between two people. Do your daily push-ups and protect your streak — miss it, and your partner profits. Not a fitness app." />
   <meta property="og:title" content="Push or Pay 😈" />
   <meta property="og:description" content="Miss your push-ups and your partner profits. Who profits when you fail?" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <div class="wrap">
-    <div class="brand"><span class="logo">💪</span> Push or Pay</div>
-
-    <!-- LANDING -->
-    <div id="s-landing" class="step">
-      <div class="card hero-hook">
-        <div class="emoji-xl">😈</div>
-        <h1 class="hook">Who profits when<br/>you fail?</h1>
-        <p class="joke" id="hookLine">The best accountability partner is the one who profits when you fail.</p>
-      </div>
-      <p class="lead">One tiny daily habit. One person who's a little too excited when you skip it. Protect the streak — the penalty is just the punchline.</p>
-      <button class="btn lg" id="startBtn">Start</button>
-      <p class="foot">Not a fitness app. A tiny game between two people.</p>
+  <nav class="nav">
+    <div class="container">
+      <div class="brand"><span class="logo">💪</span> Push or Pay</div>
+      <button class="btn" id="navStart">Start free</button>
     </div>
+  </nav>
 
-    <!-- MODE -->
-    <div id="s-mode" class="step hidden">
-      <h1 class="title">How do you want to play?</h1>
-      <div class="choice">
-        <button id="modeSelf" class="sel"><span class="emoji">🙋</span><span class="t">I'll do it</span><span class="d">I do the push-ups. Someone profits when I skip.</span></button>
-        <button id="modePrank"><span class="emoji">😈</span><span class="t">Prank someone</span><span class="d">I set it up for them. I profit when they skip.</span></button>
-      </div>
-      <button class="btn" id="modeNext">Next</button>
-    </div>
-
-    <!-- WARNING -->
-    <div id="s-warn" class="step hidden">
-      <div class="card warn-card">
-        <div class="emoji-xl">⚠️</div>
-        <p class="warn" id="warnLine">Do NOT show this app to your partner… unless you're ready for them to become your accountability coach.</p>
-      </div>
-      <button class="btn fire" id="warnBtn">I understand the risk</button>
-    </div>
-
-    <!-- CREATE -->
-    <div id="s-create" class="step hidden">
-      <h1 class="title" id="createTitle">Your promise</h1>
-      <form id="createForm">
-        <div class="card">
-          <label id="lblOwner" for="owner">Your name</label>
-          <input id="owner" placeholder="Sam" autocomplete="off" required />
-          <label id="lblPartner" for="partner">Who profits when you fail?</label>
-          <input id="partner" placeholder="Wife ❤️" autocomplete="off" required />
-        </div>
-        <div class="card">
-          <div class="field-row"><span class="fl">Daily habit</span><span class="fv">💪 Push-ups</span></div>
-          <div class="field-row"><span class="fl">Daily target</span><input id="target" class="mini" type="number" min="1" max="1000" value="10" /></div>
-          <div class="field-row"><span class="fl">Currency</span>
-            <select id="currency" class="mini">
-              <option value="$">$ USD</option><option value="S$">S$ SGD</option><option value="Rp">Rp IDR</option>
-              <option value="£">£ GBP</option><option value="€">€ EUR</option><option value="₹">₹ INR</option>
-            </select>
+  <!-- ===================== MARKETING ===================== -->
+  <main id="marketing">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">😈 Not a fitness app — a tiny game for two</span>
+          <h1 class="display">Who profits<br/>when you <span class="grad">fail?</span></h1>
+          <p class="sub">Do one tiny daily habit and protect your streak. Miss it, and your partner earns the penalty — then gets to cheer, heckle, or raise the stakes.</p>
+          <div class="cta-row">
+            <button class="btn lg" id="heroStart">Start a challenge</button>
+            <a class="btn ghost lg" href="#how">See how it works</a>
           </div>
-          <div class="field-row"><span class="fl">Penalty / miss</span><input id="penalty" class="mini" type="number" min="1" value="10" /></div>
-          <p class="hint" id="penaltyHint"></p>
+          <p class="trust">No sign-up. No real money. Just skin in the game.</p>
         </div>
-        <button class="btn" type="submit" id="createBtn">Create challenge</button>
-        <p class="msg" id="msg"></p>
-      </form>
-    </div>
+        <div class="hero-visual">
+          <div class="device">
+            <div class="device-screen">
+              <div class="dv-flame">🔥</div>
+              <div class="dv-num">12</div>
+              <div class="dv-label">Day streak</div>
+              <div class="dv-heat" id="dvHeat"></div>
+              <div class="dv-mission">
+                <div class="t">Today's mission</div>
+                <div class="g">10 push-ups · miss it, Wife earns $10</div>
+                <div class="dv-cta">Start 10 push-ups</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <!-- DONE -->
-    <div id="s-done" class="step hidden">
-      <div class="card center done-card">
-        <div class="emoji-xl" id="doneEmoji">😈</div>
-        <h1 class="title" id="doneTitle">Challenge created</h1>
-        <p class="lead" id="doneLead"></p>
-        <label id="sendLabel">Send this link</label>
-        <div class="lk"><input readonly id="sendLink" /><button class="copy" id="copySend">Copy</button></div>
-        <button class="btn" id="openBtn">Open my page</button>
-        <p class="hint center" id="keepMsg"></p>
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker">How it works</span>
+          <h2>Three taps to accountability</h2>
+          <p>Set a tiny promise, hand your partner the power, then just don't break the streak.</p>
+        </div>
+        <div class="steps">
+          <div class="step-card"><div class="n">1</div><h3>Make a promise</h3><p>Pick a daily target (10 push-ups) and a penalty. Or prank someone and set it up <em>for</em> them.</p></div>
+          <div class="step-card"><div class="n">2</div><h3>Give them the power 😈</h3><p>Send your partner a link. They see your streak, cheer you on, and can raise the penalty.</p></div>
+          <div class="step-card"><div class="n">3</div><h3>Protect the streak</h3><p>Tap out your reps each day. Miss it and your partner profits — and everyone sees the empty box.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker">The voice</span>
+          <h2>We never guilt you. We just make it funny.</h2>
+          <p>The streak is the hero. The penalty is the punchline. Your partner is the lovable final boss.</p>
+        </div>
+        <div class="voice-grid">
+          <div class="bubble bad">
+            <div class="lbl">✕ Never this</div>
+            <div class="line">You failed today's workout.</div>
+            <div class="line">You owe your wife $50.</div>
+          </div>
+          <div class="bubble good">
+            <div class="lbl">✓ Always this</div>
+            <div class="line">Someone just earned bubble tea. 🧋</div>
+            <div class="line">Your wife is watching 👀 — 10 push-ups stand between you and her coffee fund.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="feature-split">
+          <div class="feat">
+            <div class="emoji">😈</div>
+            <h3>Prank a loved one</h3>
+            <p>Set the challenge up for your partner and send it over. They open it to a full-screen <em>"you've been challenged"</em> alert — and the countdown to their first excuse begins.</p>
+          </div>
+          <div class="feat">
+            <div class="emoji">🫣</div>
+            <h3>The IDR gag</h3>
+            <p>Default the penalty in Indonesian Rupiah. It reads terrifying at first glance… then the reveal lands.</p>
+            <div class="demo"><div class="big">Rp 10,000</div><div class="rev">…wait, that's ≈ US$0.64 😏</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="cta-band">
+          <h2>Would you send this to your spouse?</h2>
+          <p>That's the whole product. Start a challenge and find out.</p>
+          <button class="btn lg" id="bandStart">Start a challenge</button>
+        </div>
+      </div>
+    </section>
+    <footer class="foot"><div class="container">Push or Pay — your habits, their rewards. 💪😈</div></footer>
+  </main>
+
+  <!-- ===================== ONBOARDING ===================== -->
+  <div id="onboard" class="container hidden">
+    <div class="panel">
+      <div class="brand" style="justify-content:center;margin:24px 0"><span class="logo">💪</span> Push or Pay</div>
+
+      <div id="s-mode" class="step">
+        <h1 class="title">How do you want to play?</h1>
+        <div class="choice">
+          <button id="modeSelf" class="sel"><span class="emoji">🙋</span><span class="t">I'll do it</span><span class="d">I do the push-ups. Someone profits when I skip.</span></button>
+          <button id="modePrank"><span class="emoji">😈</span><span class="t">Prank someone</span><span class="d">I set it up for them. I profit when they skip.</span></button>
+        </div>
+        <button class="btn block lg" id="modeNext" style="margin-top:16px">Next</button>
+      </div>
+
+      <div id="s-warn" class="step hidden">
+        <div class="card warn-card"><div class="emoji-xl">⚠️</div><p class="warn" id="warnLine">Do NOT show this app to your partner… unless you're ready for them to become your accountability coach.</p></div>
+        <button class="btn fire block lg" id="warnBtn">I understand the risk</button>
+      </div>
+
+      <div id="s-create" class="step hidden">
+        <h1 class="title" id="createTitle">Your promise</h1>
+        <form id="createForm">
+          <div class="card">
+            <label id="lblOwner" for="owner">Your name</label>
+            <input id="owner" placeholder="Sam" autocomplete="off" required />
+            <label id="lblPartner" for="partner">Who profits when you fail?</label>
+            <input id="partner" placeholder="Wife ❤️" autocomplete="off" required />
+          </div>
+          <div class="card">
+            <div class="field-row"><span class="fl">Daily habit</span><span class="fv">💪 Push-ups</span></div>
+            <div class="field-row"><span class="fl">Daily target</span><input id="target" class="mini" type="number" min="1" max="1000" value="10" /></div>
+            <div class="field-row"><span class="fl">Currency</span>
+              <select id="currency" class="mini">
+                <option value="$">$ USD</option><option value="S$">S$ SGD</option><option value="Rp">Rp IDR</option>
+                <option value="£">£ GBP</option><option value="€">€ EUR</option><option value="₹">₹ INR</option>
+              </select>
+            </div>
+            <div class="field-row"><span class="fl">Penalty / miss</span><input id="penalty" class="mini" type="number" min="1" value="10" /></div>
+            <p class="hint" id="penaltyHint"></p>
+          </div>
+          <button class="btn block lg" type="submit" id="createBtn">Create challenge</button>
+          <p class="msg" id="msg"></p>
+        </form>
+      </div>
+
+      <div id="s-done" class="step hidden">
+        <div class="card center">
+          <div class="emoji-xl" id="doneEmoji">😈</div>
+          <h1 class="title" id="doneTitle">Challenge created</h1>
+          <p class="lead" id="doneLead"></p>
+          <label id="sendLabel">Send this link</label>
+          <div class="lk"><input readonly id="sendLink" /><button class="copy" id="copySend">Copy</button></div>
+          <button class="btn block lg" id="openBtn" style="margin-top:16px">Open my page</button>
+          <p class="hint center" id="keepMsg"></p>
+        </div>
       </div>
     </div>
   </div>
   <div class="toast" id="toast"></div>
 
   <script>
+    // hero device mini-heatmap
+    (function(){ let h=""; for(let i=0;i<39;i++){ const r=Math.random(); h+=`<i class="${r>.86?'miss':r>.12?'on':''}"></i>`; } var el=document.getElementById('dvHeat'); if(el) el.innerHTML=h; })();
+
     let COPY = {};
-    fetch("/copy.json").then(r => r.json()).then(c => {
-      COPY = c; const rnd = (a) => a && a.length ? a[Math.floor(Math.random() * a.length)] : "";
-      const h = document.getElementById("hookLine"), w = document.getElementById("warnLine");
-      if (rnd(c.hook)) h.textContent = rnd(c.hook);
-      if (rnd(c.warning)) w.textContent = rnd(c.warning);
-    }).catch(() => {});
+    fetch("/copy.json").then(r=>r.json()).then(c=>{ COPY=c; const w=c.warning&&c.warning.length?c.warning[Math.floor(Math.random()*c.warning.length)]:""; if(w) document.getElementById("warnLine").textContent=w; }).catch(()=>{});
 
-    const show = (id) => { document.querySelectorAll(".step").forEach(s => s.classList.toggle("hidden", s.id !== id)); window.scrollTo(0, 0); };
-    const toast = (t) => { const e = document.getElementById("toast"); e.textContent = t; e.classList.add("show"); setTimeout(() => e.classList.remove("show"), 1800); };
+    const toast = (t) => { const e=document.getElementById("toast"); e.textContent=t; e.classList.add("show"); setTimeout(()=>e.classList.remove("show"),1800); };
+    const showStep = (id) => { document.querySelectorAll("#onboard .step").forEach(s=>s.classList.toggle("hidden", s.id!==id)); window.scrollTo(0,0); };
+    function openOnboard(){ document.getElementById("marketing").classList.add("hidden"); document.getElementById("onboard").classList.remove("hidden"); showStep("s-mode"); window.scrollTo(0,0); }
+    ["navStart","heroStart","bandStart"].forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=openOnboard; });
+
     let mode = "self";
+    const setMode=(m)=>{ mode=m; document.getElementById("modeSelf").classList.toggle("sel",m==="self"); document.getElementById("modePrank").classList.toggle("sel",m==="prank"); };
+    document.getElementById("modeSelf").onclick=()=>setMode("self");
+    document.getElementById("modePrank").onclick=()=>setMode("prank");
+    document.getElementById("modeNext").onclick=()=>{ applyMode(); showStep("s-warn"); };
+    document.getElementById("warnBtn").onclick=()=>showStep("s-create");
 
-    document.getElementById("startBtn").onclick = () => show("s-mode");
-    document.getElementById("modeSelf").onclick = () => setMode("self");
-    document.getElementById("modePrank").onclick = () => setMode("prank");
-    document.getElementById("modeNext").onclick = () => { applyMode(); show("s-warn"); };
-    document.getElementById("warnBtn").onclick = () => show("s-create");
-    function setMode(m) { mode = m; document.getElementById("modeSelf").classList.toggle("sel", m === "self"); document.getElementById("modePrank").classList.toggle("sel", m === "prank"); }
-
-    function applyMode() {
-      const t = document.getElementById("createTitle"), o = document.getElementById("owner"), p = document.getElementById("partner");
-      if (mode === "prank") {
-        t.textContent = "Set the trap 😈";
-        document.getElementById("lblOwner").textContent = "Your name (you profit)";
-        o.placeholder = "Wife ❤️";
-        document.getElementById("lblPartner").textContent = "Who are you challenging?";
-        p.placeholder = "Husband";
-      } else {
-        t.textContent = "Your promise";
-        document.getElementById("lblOwner").textContent = "Your name";
-        o.placeholder = "Sam";
-        document.getElementById("lblPartner").textContent = "Who profits when you fail?";
-        p.placeholder = "Wife ❤️";
-      }
+    function applyMode(){
+      const o=document.getElementById("owner"), p=document.getElementById("partner");
+      if(mode==="prank"){ document.getElementById("createTitle").textContent="Set the trap 😈"; document.getElementById("lblOwner").textContent="Your name (you profit)"; o.placeholder="Wife ❤️"; document.getElementById("lblPartner").textContent="Who are you challenging?"; p.placeholder="Husband"; }
+      else { document.getElementById("createTitle").textContent="Your promise"; document.getElementById("lblOwner").textContent="Your name"; o.placeholder="Sam"; document.getElementById("lblPartner").textContent="Who profits when you fail?"; p.placeholder="Wife ❤️"; }
     }
 
-    const USD_PER = { "$": 1, "US$": 1, "S$": 0.74, "£": 1.27, "€": 1.08, "₹": 0.012, "Rp": 0.000064 };
-    function updateHint() {
-      const cur = document.getElementById("currency").value, amt = Number(document.getElementById("penalty").value) || 0, hint = document.getElementById("penaltyHint");
-      if (cur === "Rp" && amt >= 1000) hint.innerHTML = `Looks scary… <b>≈ US$${(amt * USD_PER.Rp).toFixed(2)}</b> 😏 &nbsp;that's the joke`;
-      else if (USD_PER[cur] && cur !== "$" && cur !== "US$") { const u = amt * USD_PER[cur]; hint.textContent = `≈ US$${u < 10 ? u.toFixed(1) : u.toFixed(0)}`; }
-      else hint.textContent = "";
-    }
-    document.getElementById("currency").addEventListener("change", () => {
-      const cur = document.getElementById("currency").value, pen = document.getElementById("penalty");
-      if (cur === "Rp" && (Number(pen.value) === 10 || !pen.value)) pen.value = 10000;
-      if (cur !== "Rp" && Number(pen.value) === 10000) pen.value = 10;
-      updateHint();
-    });
-    document.getElementById("penalty").addEventListener("input", updateHint);
+    const USD_PER={ "$":1,"US$":1,"S$":0.74,"£":1.27,"€":1.08,"₹":0.012,"Rp":0.000064 };
+    function updateHint(){ const cur=document.getElementById("currency").value, amt=Number(document.getElementById("penalty").value)||0, hint=document.getElementById("penaltyHint");
+      if(cur==="Rp"&&amt>=1000) hint.innerHTML=`Looks scary… <b>≈ US$${(amt*USD_PER.Rp).toFixed(2)}</b> 😏 &nbsp;that's the joke`;
+      else if(USD_PER[cur]&&cur!=="$"&&cur!=="US$"){ const u=amt*USD_PER[cur]; hint.textContent=`≈ US$${u<10?u.toFixed(1):u.toFixed(0)}`; } else hint.textContent=""; }
+    document.getElementById("currency").addEventListener("change",()=>{ const cur=document.getElementById("currency").value, pen=document.getElementById("penalty"); if(cur==="Rp"&&(Number(pen.value)===10||!pen.value)) pen.value=10000; if(cur!=="Rp"&&Number(pen.value)===10000) pen.value=10; updateHint(); });
+    document.getElementById("penalty").addEventListener("input",updateHint);
 
-    document.getElementById("createForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("createBtn"), msg = document.getElementById("msg");
-      btn.disabled = true; msg.textContent = "Creating…"; msg.className = "msg";
-      const nameA = document.getElementById("owner").value, nameB = document.getElementById("partner").value;
-      const owner_name = mode === "prank" ? nameB : nameA;   // API owner = the DOER
-      const partner_name = mode === "prank" ? nameA : nameB; // API partner = the PROFITEER
+    document.getElementById("createForm").addEventListener("submit", async (e)=>{
+      e.preventDefault(); const btn=document.getElementById("createBtn"), msg=document.getElementById("msg");
+      btn.disabled=true; msg.textContent="Creating…"; msg.className="msg";
+      const nameA=document.getElementById("owner").value, nameB=document.getElementById("partner").value;
+      const owner_name=mode==="prank"?nameB:nameA, partner_name=mode==="prank"?nameA:nameB;
       try {
-        const res = await fetch("/api?action=create", { method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ owner_name, partner_name, daily_target: document.getElementById("target").value,
-            penalty_amount: document.getElementById("penalty").value, currency: document.getElementById("currency").value, created_via: mode }) });
-        const d = await res.json();
-        if (!res.ok) throw new Error(d.error || "Something went wrong");
-        document.getElementById("sendLink").value = location.origin + d.send;
-        if (mode === "prank") {
-          document.getElementById("doneEmoji").textContent = "😈";
-          document.getElementById("doneTitle").textContent = "Trap set";
-          document.getElementById("doneLead").textContent = `Send this to ${nameB}. They'll get the challenge alert — enjoy the reaction.`;
-          document.getElementById("sendLabel").textContent = `Send ${nameB} the challenge`;
-          document.getElementById("openBtn").textContent = "Open my dashboard";
-          document.getElementById("keepMsg").innerHTML = "You keep the profiteer view — raise the penalty, cheer (or heckle).";
-        } else {
-          document.getElementById("doneEmoji").textContent = "💪";
-          document.getElementById("doneTitle").textContent = "Challenge created";
-          document.getElementById("doneLead").textContent = `Now give ${nameB} the power 😈 — they'll see your streak, cheer you on, and can raise the penalty.`;
-          document.getElementById("sendLabel").textContent = `Send ${nameB} their link`;
-          document.getElementById("openBtn").textContent = "Open my dashboard";
-          document.getElementById("keepMsg").innerHTML = "Bookmark <b>your page</b> after it opens — it's your control panel.";
-        }
-        document.getElementById("openBtn").onclick = () => location.href = d.keep;
-        show("s-done");
-      } catch (err) { msg.textContent = err.message; msg.className = "msg err"; btn.disabled = false; }
+        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("penalty").value,currency:document.getElementById("currency").value,created_via:mode})});
+        const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
+        document.getElementById("sendLink").value=location.origin+d.send;
+        if(mode==="prank"){ document.getElementById("doneEmoji").textContent="😈"; document.getElementById("doneTitle").textContent="Trap set"; document.getElementById("doneLead").textContent=`Send this to ${nameB}. They'll get the challenge alert — enjoy the reaction.`; document.getElementById("sendLabel").textContent=`Send ${nameB} the challenge`; document.getElementById("openBtn").textContent="Open my dashboard"; document.getElementById("keepMsg").innerHTML="You keep the profiteer view — raise the penalty, cheer (or heckle)."; }
+        else { document.getElementById("doneEmoji").textContent="💪"; document.getElementById("doneTitle").textContent="Challenge created"; document.getElementById("doneLead").textContent=`Now give ${nameB} the power 😈 — they'll see your streak, cheer you on, and can raise the penalty.`; document.getElementById("sendLabel").textContent=`Send ${nameB} their link`; document.getElementById("openBtn").textContent="Open my dashboard"; document.getElementById("keepMsg").innerHTML="Bookmark <b>your page</b> after it opens — it's your control panel."; }
+        document.getElementById("openBtn").onclick=()=>location.href=d.keep; showStep("s-done");
+      } catch(err){ msg.textContent=err.message; msg.className="msg err"; btn.disabled=false; }
     });
-
-    document.getElementById("copySend").onclick = async () => {
-      const i = document.getElementById("sendLink");
-      try { await navigator.clipboard.writeText(i.value); } catch (_) { i.select(); document.execCommand("copy"); }
-      toast("Link copied 📋");
-    };
+    document.getElementById("copySend").onclick=async()=>{ const i=document.getElementById("sendLink"); try{await navigator.clipboard.writeText(i.value);}catch(_){i.select();document.execCommand("copy");} toast("Link copied 📋"); };
     applyMode();
   </script>
 </body>
