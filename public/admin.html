@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Penalty Partner — Analytics</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .wrap { max-width: 760px; }
+    .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 620px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-top: 8px; }
+    .bars .b { flex: 1; background: var(--green-dim); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; }
+    .bars .b.has { background: var(--green); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    .tblwrap { overflow-x: auto; }
+    .no { color: var(--muted); }
+    .yes { color: var(--green); }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app">
+    <div class="brand"><span class="logo">📊</span> Penalty Partner · Analytics</div>
+    <div id="gate" class="card">
+      <h2>Admin access</h2>
+      <label for="k">Admin key</label>
+      <input id="k" type="password" placeholder="PP_ADMIN_KEY" />
+      <button class="btn" id="go">View analytics</button>
+      <p class="msg" id="gmsg"></p>
+    </div>
+    <div id="dash"></div>
+  </div>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    async function load(key) {
+      const r = await fetch("/api?action=stats&key=" + encodeURIComponent(key));
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "error");
+      return d;
+    }
+
+    function stat(n, l) { return `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+
+    function render(d) {
+      const t = d.totals;
+      const maxc = Math.max(1, ...d.signups_by_day.map((x) => x.count));
+      const bars = d.signups_by_day.map((x) =>
+        `<div class="b ${x.count ? "has" : ""}" style="height:${Math.round(x.count / maxc * 100)}%" title="${x.date}: ${x.count}"></div>`
+      ).join("");
+
+      const rows = d.recent.map((c) => `
+        <tr>
+          <td>${esc(c.owner)} → ${esc(c.partner)}</td>
+          <td>${esc(c.habit)}</td>
+          <td>${esc(c.currency)}${c.penalty}</td>
+          <td>${c.checkins}</td>
+          <td>${c.streak}🔥</td>
+          <td>${esc(c.currency)}${c.debt}</td>
+          <td>${c.shares}</td>
+          <td class="${c.partner_joined ? "yes" : "no"}">${c.partner_joined ? "✓" : "—"}</td>
+          <td class="no">${c.created ? new Date(c.created).toISOString().slice(0, 10) : "?"}</td>
+        </tr>`).join("");
+
+      $("#dash").innerHTML = `
+        <div class="grid4" style="margin-bottom:14px">
+          ${stat(t.signups, "Signups")}
+          ${stat(t.partners_joined, "Partners joined")}
+          ${stat(t.total_checkins, "Check-ins")}
+          ${stat(t.shares, "Shares")}
+        </div>
+        <div class="grid4" style="margin-bottom:16px">
+          ${stat(t.activation_rate + "%", "Activated")}
+          ${stat(t.retention_2d + "%", "Retained 2d+")}
+          ${stat(t.retention_7d + "%", "Retained 7d+")}
+          ${stat(t.active_last_7d, "Active (7d)")}
+        </div>
+        <div class="card">
+          <h2>Signups · last 30 days</h2>
+          <div class="bars">${bars}</div>
+        </div>
+        <div class="card">
+          <h2>Challenges (${d.recent.length})</h2>
+          <div class="tblwrap"><table>
+            <tr><th>Owner → Partner</th><th>Habit</th><th>Penalty</th><th>Check-ins</th><th>Streak</th><th>Debt</th><th>Shares</th><th>Joined</th><th>Created</th></tr>
+            ${rows || '<tr><td colspan="9" class="no">No challenges yet.</td></tr>'}
+          </table></div>
+        </div>
+        <p class="foot">Real data, derived live from stored challenges. No accounts = a signup is a created challenge.</p>`;
+    }
+
+    async function run(key) {
+      try {
+        const d = await load(key);
+        localStorage.setItem("pp_admin", key);
+        $("#gate").classList.add("hidden");
+        render(d);
+      } catch (e) {
+        $("#gmsg").textContent = e.message;
+        $("#gmsg").className = "msg err";
+      }
+    }
+
+    $("#go").onclick = () => run($("#k").value.trim());
+    $("#k").addEventListener("keydown", (e) => { if (e.key === "Enter") run($("#k").value.trim()); });
+    const saved = localStorage.getItem("pp_admin");
+    if (saved) run(saved);
+  </script>
+</body>
+</html>

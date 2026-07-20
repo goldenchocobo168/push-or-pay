@@ -1,0 +1,13 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Pretty challenge URLs: /c/<id>?t=<token> is served by challenge.html
+# (the id is read from the path, the token from the query string).
+[[redirects]]
+  from = "/c/*"
+  to = "/challenge.html"
+  status = 200
+
+# The API function declares its own route (config.path = "/api") so no
+# redirect is needed for it. Netlify Blobs is auto-configured at runtime.
