@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Penalty Partner — Analytics</title>
+  <title>Push or Pay — Analytics</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>" />
   <link rel="stylesheet" href="/style.css" />
   <style>
@@ -11,7 +11,7 @@
     .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     @media (min-width: 620px) { .grid4 { grid-template-columns: repeat(4, 1fr); } }
     .bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-top: 8px; }
-    .bars .b { flex: 1; background: var(--green-dim); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; }
+    .bars .b { flex: 1; background: rgba(48,209,88,0.25); border-radius: 3px 3px 0 0; min-height: 2px; position: relative; }
     .bars .b.has { background: var(--green); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -23,7 +23,7 @@
 </head>
 <body>
   <div class="wrap" id="app">
-    <div class="brand"><span class="logo">📊</span> Penalty Partner · Analytics</div>
+    <div class="brand"><span class="logo">📊</span> Push or Pay · Analytics</div>
     <div id="gate" class="card">
       <h2>Admin access</h2>
       <label for="k">Admin key</label>
@@ -56,11 +56,11 @@
       const rows = d.recent.map((c) => `
         <tr>
           <td>${esc(c.owner)} → ${esc(c.partner)}</td>
-          <td>${esc(c.habit)}</td>
+          <td>${c.via === "prank" ? "😈 prank" : "🙋 self"}</td>
           <td>${esc(c.currency)}${c.penalty}</td>
-          <td>${c.checkins}</td>
+          <td>${c.sessions}</td>
           <td>${c.streak}🔥</td>
-          <td>${esc(c.currency)}${c.debt}</td>
+          <td>${esc(c.currency)}${c.earned}</td>
           <td>${c.shares}</td>
           <td class="${c.partner_joined ? "yes" : "no"}">${c.partner_joined ? "✓" : "—"}</td>
           <td class="no">${c.created ? new Date(c.created).toISOString().slice(0, 10) : "?"}</td>
@@ -69,15 +69,15 @@
       $("#dash").innerHTML = `
         <div class="grid4" style="margin-bottom:14px">
           ${stat(t.signups, "Signups")}
+          ${stat(t.pranks, "Pranks 😈")}
           ${stat(t.partners_joined, "Partners joined")}
-          ${stat(t.total_checkins, "Check-ins")}
           ${stat(t.shares, "Shares")}
         </div>
         <div class="grid4" style="margin-bottom:16px">
+          ${stat(t.total_sessions, "Push-up sessions")}
           ${stat(t.activation_rate + "%", "Activated")}
           ${stat(t.retention_2d + "%", "Retained 2d+")}
           ${stat(t.retention_7d + "%", "Retained 7d+")}
-          ${stat(t.active_last_7d, "Active (7d)")}
         </div>
         <div class="card">
           <h2>Signups · last 30 days</h2>
@@ -86,11 +86,11 @@
         <div class="card">
           <h2>Challenges (${d.recent.length})</h2>
           <div class="tblwrap"><table>
-            <tr><th>Owner → Partner</th><th>Habit</th><th>Penalty</th><th>Check-ins</th><th>Streak</th><th>Debt</th><th>Shares</th><th>Joined</th><th>Created</th></tr>
+            <tr><th>Doer → Profiteer</th><th>Via</th><th>Penalty</th><th>Sessions</th><th>Streak</th><th>Earned</th><th>Shares</th><th>Joined</th><th>Created</th></tr>
             ${rows || '<tr><td colspan="9" class="no">No challenges yet.</td></tr>'}
           </table></div>
         </div>
-        <p class="foot">Real data, derived live from stored challenges. No accounts = a signup is a created challenge.</p>`;
+        <p class="foot">Real data, derived live from stored challenges. No accounts = a signup is a created challenge. New signups/sessions can take a moment to appear (storage list is eventually consistent).</p>`;
     }
 
     async function run(key) {

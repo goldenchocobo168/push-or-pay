@@ -1,7 +1,7 @@
 #!/bin/bash
-# Penalty Partner — autonomous DRI (Tibo) RSI loop wrapper.
+# Push or Pay — autonomous DRI (Tibo) RSI loop wrapper.
 # One full RSI cycle per fire, then exit. Scheduled by the systemd timer
-# penalty-partner-rsi.timer (NEVER raw crontab — see the 2026-07-08 crontab-wipe).
+# push-or-pay-rsi.timer (NEVER raw crontab — see the 2026-07-08 crontab-wipe).
 #
 # Mirrors psh-tibo-rsi.sh: single-flight lock, deterministic MODE injection by
 # UTC hour, deterministic OBSERVE prepended, then the agentic `claude -p` brain.
@@ -14,11 +14,11 @@
 #   PP_DRI_DRYRUN=1 assemble + print the prompt/command but do NOT invoke claude.
 set -uo pipefail
 
-PROJ="/root/penalty-partner"
+PROJ="/root/push-or-pay"
 PROMPT_FILE="$PROJ/dri/prompt.md"
-LOGDIR="/root/.pp-diag/rsi-logs"
+LOGDIR="/root/.pop-diag/rsi-logs"
 HEARTBEAT="$LOGDIR/heartbeat.log"
-LOCK="/tmp/penalty-partner-rsi.lock"
+LOCK="/tmp/push-or-pay-rsi.lock"
 CLAUDE="/root/.hermes/node/bin/claude"
 MODEL="${TIBO_MODEL:-claude-sonnet-5}"
 POST_HOURS="${TIBO_POST_HOURS:-01 09 17}"

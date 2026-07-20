@@ -1,0 +1,6 @@
+[Unit]
+Description=Push or Pay DRI heartbeat watchdog
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /root/push-or-pay/dri/watchdog.sh
+TimeoutStartSec=120

@@ -3,7 +3,7 @@
 # is NOT proof it worked — verify by output freshness). Meant to run ~hourly,
 # offset from the RSI loop, via its own systemd timer.
 set -uo pipefail
-HEARTBEAT="/root/.pp-diag/rsi-logs/heartbeat.log"
+HEARTBEAT="/root/.pop-diag/rsi-logs/heartbeat.log"
 MAX_AGE_MIN="${PP_WATCHDOG_MAX_AGE_MIN:-150}"   # ~2.5h: two missed hourly fires
 
 now=$(date +%s)
@@ -14,7 +14,7 @@ fi
 mtime=$(stat -c %Y "$HEARTBEAT")
 age_min=$(( (now - mtime) / 60 ))
 if [ "$age_min" -gt "$MAX_AGE_MIN" ]; then
-  MSG="⚠️ Penalty Partner DRI heartbeat stale: ${age_min}m old (> ${MAX_AGE_MIN}m). Loop may be stuck."
+  MSG="⚠️ Push or Pay DRI heartbeat stale: ${age_min}m old (> ${MAX_AGE_MIN}m). Loop may be stuck."
   echo "$(date -Is) $MSG"
   # Best-effort Telegram via the fleet's notifier if present; never hard-fail.
   if [ -x /root/.openclaw/shared/scripts/notify-sam.sh ]; then

@@ -1,7 +1,0 @@
-[Unit]
-Description=Penalty Partner DRI heartbeat watchdog
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash /root/penalty-partner/dri/watchdog.sh
-TimeoutStartSec=120

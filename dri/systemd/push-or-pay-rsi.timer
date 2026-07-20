@@ -1,9 +1,7 @@
 [Unit]
-Description=Hourly Penalty Partner DRI (Tibo) RSI loop
-
+Description=Hourly Push or Pay DRI (Tibo) RSI loop
 [Timer]
 OnCalendar=*-*-* *:17:00
 Persistent=true
-
 [Install]
 WantedBy=timers.target
