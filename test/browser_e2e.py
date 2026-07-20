@@ -36,14 +36,17 @@ def check(name, cond):
     if not cond: fails.append(name)
 
 try:
-    print("landing")
+    print("landing (desktop marketing)")
     goto(BASE + "/")
     check("title has Push or Pay", "Push or Pay" in (js("document.title") or ""))
-    check("hook 'Who profits when you fail'", "profits" in (js("document.querySelector('.hook').textContent") or "").lower())
-    check("Start button visible", js("!document.getElementById('s-landing').classList.contains('hidden')"))
+    check("hero headline 'Who profits...'", "profits" in (js("document.querySelector('.display').textContent") or "").lower())
+    check("nav Start free button", js("!!document.getElementById('navStart')"))
+    check("hero device mockup present", js("!!document.querySelector('.device .dv-num')"))
+    check("how-it-works 3 step cards", (js("document.querySelectorAll('.step-card').length") or 0) == 3)
 
-    print("start -> mode -> next -> warning -> create")
-    js("document.getElementById('startBtn').click()"); time.sleep(0.4)
+    print("start -> onboarding mode -> next -> warning -> create")
+    js("document.getElementById('heroStart').click()"); time.sleep(0.5)
+    check("marketing hidden, onboarding shown", js("document.getElementById('marketing').classList.contains('hidden') && !document.getElementById('onboard').classList.contains('hidden')"))
     check("mode screen shown", js("!document.getElementById('s-mode').classList.contains('hidden')"))
     js("document.getElementById('modeNext').click()"); time.sleep(0.4)
     check("warning screen shown", js("!document.getElementById('s-warn').classList.contains('hidden')"))
