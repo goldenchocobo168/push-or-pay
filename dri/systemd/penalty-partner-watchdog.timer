@@ -1,0 +1,9 @@
+[Unit]
+Description=Penalty Partner DRI watchdog (offset from RSI loop)
+
+[Timer]
+OnCalendar=*-*-* *:47:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

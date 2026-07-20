@@ -4,3 +4,8 @@ node_modules/
 .env.*
 *.log
 .DS_Store
+.admin-key.txt
+test/e2e-*.png
+dri/.admin-key.txt
+dri/journal/*.jsonl
+dri/journal/*.md
