@@ -1,74 +1,73 @@
-# 🏋️ Penalty Partner
+# 💪 Push or Pay
 
-> Turn your loved ones into your accountability partners. Miss a tiny daily habit and they earn the penalty. The best accountability partner is the one who profits when you fail.
+> **Not a fitness app. A tiny game between two people.** One person protects their streak — the
+> other gets a little too excited when they fail. The streak is the hero, the penalty is the joke,
+> the relationship is the product. *Who profits when you fail?*
 
-A fun, zero-friction accountability web app. Create a challenge ("1 push-up daily"), set a
-penalty, invite your partner with a link. Every day you tap **I did it**. Miss it, your virtual
-**debt** to them grows and your **streak** breaks — both of you see the same GitHub-style heatmap
-in real time. No login, no real money, just skin in the game.
+Do your tiny daily habit (push-ups) and protect your **streak**. Miss it, and your partner —
+the lovable final boss — **profits** (a virtual penalty) and gets to cheer, heckle, or *raise the
+stakes*. Built to make couples **laugh while building habits together**. The most important
+metric: *"would someone send this screenshot to their spouse?"*
 
-Built from the ChatGPT product spec, applying Elon's 5-step algorithm: question every
-requirement → delete → simplify → speed up → automate. Auto-PayNow was deleted (validate the
-behavior first); the debt is a virtual ledger you settle with one tap.
+Built from the product spec in [`idea/Push or Pay idea.pdf`](idea/), Elon-5P applied (real PayNow
+transfer is explicitly **not** built — validate the funny behavior first).
 
-## What it does
+## Live
+- App: **https://push-or-pay.netlify.app**
+- Analytics (admin-gated): **/admin** — signups, pranks, push-up sessions, retention, shares.
+- Repo: **github.com/goldenchocobo168/push-or-pay**
 
-- **Create a challenge** — habit + penalty + partner name. No account.
-- **Two magic links** — an owner control-panel link, and an invite link for the partner.
-- **Daily check-in** — one button. Debt & streak are computed lazily from the check-in history
-  in Singapore time, so there is **no midnight cron**: a missed day is simply any past day with
-  no check-in, after the last settlement.
-- **Heatmap** — last 90 days, done / missed / forgiven / today. Both roles see it live.
-- **Partner powers** — cheer with emoji reactions, or **forgive** a day (mercy button).
-- **Settle** — "mark as paid" resets the ledger.
-- **Share card** — a screenshot-able streak card ("I owe my wife $60 for skipping 6 push-ups").
-- **Analytics** — `/admin` (admin-key gated) shows real signups, activation, retention, usage,
-  and shares, derived live from stored challenges.
+## What it does (the brand rules)
+1. **Never guilt.** Not "you failed" — *"Someone just earned bubble tea 🧋."*
+2. **Always a little funny.** Every screen has a joke (static copy in `public/copy.json`, no AI).
+3. **The partner is the lovable final boss** — *"Your wife is watching 👀."*
+
+- **Onboarding**: hook → **self or prank** mode → a funny warning gate → *Your promise* → invite
+  ("give your partner the power 😈").
+- **Prank / reverse flow**: set a challenge up *for* someone and send it — they get a
+  *"X challenged you!"* alert.
+- **IDR sticker-shock gag**: default `Rp 10,000` reads huge, then deflates to *≈ US$0.64* 😏.
+- **Push-up session**: put the phone down, tap the big button per rep (chin/finger), live counter
+  + timer + overachievement **bonus** + confetti. A day counts when a session hits the target.
+- **Streak = hero** (GitHub-style 90-day heatmap, both sides see it live). Partner can **cheer**
+  and **raise the penalty** (2× / 5× / custom).
+- **Shareable card** ("😭 my wife earned $60 this week").
 
 ## Architecture
-
-Static frontend + one Netlify Function (v2) + **Netlify Blobs** for shared state. No external
-database, no build step for the frontend, no background jobs.
-
-```
-public/            static frontend (no build)
-  index.html       landing + create challenge
-  challenge.html   owner/partner view (loaded by app.js)
-  admin.html       analytics dashboard
-  app.js  style.css
-lib/penalty.mjs    pure, dependency-free debt/streak/heatmap logic (unit-tested)
-netlify/functions/api.js   the whole API (?action=create|get|checkin|forgive|settle|share|stats)
-test/              node assertions: logic (27) + handler E2E (29)
-```
-
-## Data model (one Blobs entry per challenge)
+Static frontend + **one Netlify Function (v2)** + **Netlify Blobs** (shared state). No external DB,
+no build step, **no cron** (streak/earnings computed lazily in SGT). One Blobs entry per challenge:
+`owner`(doer)/`partner`(profiteer) magic-link tokens, `daily_target`, `penalty_amount`, `currency`,
+`sessions{date:{reps,duration,…}}`, `penalty_events`, `cheers`, `created_via`.
 
 ```
-id, owner_name, partner_name, habit, penalty, currency,
-owner_token, partner_token,          # role = which token you hold
-start_date, checkins{date:ts}, forgiven{date:ts},
-settled_through, settlements[], share_count, partner_first_seen, reactions{date:[]}
+public/            static frontend (no build): index (onboarding), challenge (app), admin, copy.json
+lib/penalty.mjs    pure streak/earnings/heatmap + money/IDR logic (unit-tested)
+netlify/functions/api.js   ?action=create|get|session|penalty|cheer|share|stats
+dri/               autonomous Tibo DRI (owns the product) — see below
+design/            top-1% UI/UX inspiration gallery
+test/              30 logic + 39 handler assertions + real-browser CDP E2E
 ```
 
 ## Run tests
-
 ```
-npm install
-npm test
+npm install && npm test          # 69 assertions
+python3 test/browser_e2e.py      # real-browser end-to-end (needs Chrome on :9222)
 ```
 
 ## Deploy
-
+`netlify --prod` is **Forbidden** on this account — use the draft+promote wrapper:
 ```
-netlify deploy --prod
-# set the admin key once:
-netlify env:set PP_ADMIN_KEY <a-strong-key>
+dri/deploy.sh                    # npm test -> draft deploy -> promote -> verify live
+netlify env:set PP_ADMIN_KEY <key>   # for /admin
 ```
 
-Analytics: `https://<site>/admin` → enter `PP_ADMIN_KEY`.
+## Ownership — the Tibo DRI
+Owned end-to-end by an autonomous **Tibo DRI** (`dri/`, hourly systemd timer, shadow-first
+`PP_DRI_SHIP=0`). North Star = **SHARED** ("would-send-to-spouse") + **ACTIVE-PAIRS**. It observes
+real metrics, calibrates, decides the next move, and ships — escalating only real-money / infra /
+bulk-delete / mission-pivot. Kill switch: `systemctl disable --now push-or-pay-rsi.timer`.
+Graduate to autonomous shipping: set `PP_DRI_SHIP=1` in `push-or-pay-rsi.service` + `daemon-reload`.
 
-## Ownership
-
-This product is owned end-to-end by an autonomous **Tibo DRI loop** (`dri/`), which observes
-real metrics, calibrates on the deliverable, decides the next highest-leverage move, and ships —
-escalating only the hard gates (real money, prod infra, bulk deletes, mission pivots).
+## Design
+Follows the fleet design baseline (`~/.openclaw/shared/distilled/concepts/design-baseline.md`,
+Apple-grade, techno-futurist lane). Inspiration gallery: `design/ui-ux-inspiration.md`.
