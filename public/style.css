@@ -223,6 +223,26 @@ input:focus, select:focus { border-color: var(--accent); }
 .lk { display: flex; gap: 8px; margin-top: 10px; } .lk input { font-size: 13px; } .copy { flex: 0 0 auto; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 600; }
 .raise { }
 
+/* lazy-tax notification banner */
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left;
+  background: linear-gradient(180deg, rgba(60,26,26,.55), var(--surface)); border-color: rgba(255,94,94,.28); }
+.banner .big { font-size: 20px; font-weight: 800; color: var(--amber); display: inline-block; margin: 4px 0; }
+.banner .btn { margin: 0; flex: 0 0 auto; }
+
+/* lazy tax card — money is the joke, kept quiet */
+.lazy-card .lz-label { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .02em; }
+.lazy-card .lz-amt { font-size: 30px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; }
+.lazy-card .lz-amt .h { font-size: 13px; font-weight: 500; color: var(--faint); }
+.day-detail { text-align: center; margin-top: 10px; min-height: 18px; }
+
+/* watcher invitation */
+.invite-card { padding: 30px 22px; }
+.invite-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); text-align: left; }
+.invite-row:last-of-type { border-bottom: none; }
+.invite-row .k { color: var(--muted); font-size: 14px; } .invite-row .v { font-weight: 600; }
+.power-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.power-list div { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; font-size: 15px; }
+
 .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px); background: rgba(20,20,28,.95); border: 1px solid var(--line-2); padding: 13px 20px; border-radius: 14px; box-shadow: var(--sh-md); opacity: 0; transition: opacity .22s, transform .22s var(--ease); pointer-events: none; max-width: 90%; text-align: center; z-index: 60; backdrop-filter: blur(14px); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .hidden { display: none !important; }

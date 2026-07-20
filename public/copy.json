@@ -1,46 +1,58 @@
 {
   "hook": [
-    "Who profits when you fail?",
-    "The best accountability partner is the one who profits when you fail.",
-    "Miss your push-ups. Fund your wife's bubble tea."
+    "Who profits when you skip?",
+    "A funny game you play with your wife.",
+    "Skip your push-ups. Fund her bubble tea."
   ],
   "warning": [
-    "Do NOT show this app to your spouse… unless you're ready for them to become your accountability coach.",
+    "Do NOT show this app to your spouse… unless you're serious about building habits.",
     "This app gives your partner a dangerous amount of power. Use responsibly.",
-    "Warning: your excuses are about to lose."
+    "Warning: your excuses are about to meet their final boss."
   ],
-  "invite": [
-    "There is no turning back now 😈",
-    "Your accountability boss has been notified.",
-    "Your partner has entered the chat. Excuses have been disabled."
+  "warning_ack": [
+    "Interesting choice… your excuses have been notified. 😈",
+    "Bold. Your partner is going to love this.",
+    "No going back now. 😈"
+  ],
+  "invite_sent": [
+    "There is no turning back now. 😈",
+    "Your final boss has entered the game.",
+    "Your wife has entered the game."
   ],
   "dashboard": [
+    "Your streak is alive. Keep it that way.",
     "Your streak survived yesterday. Don't make it regret trusting you.",
-    "Your streak is waiting. Your excuses are not invited.",
-    "Your partner is financially invested in your success.",
-    "10 push-ups stand between you and their coffee fund."
+    "Don't break the green.",
+    "Your partner is watching. 👀"
+  ],
+  "watcher": [
+    "Your final boss is watching. 👀",
+    "Waiting patiently for a skip day. 🍿",
+    "Financially invested in the streak breaking. 💸"
   ],
   "success": [
-    "Streak protected. Your partner earned $0 today. Everyone wins.",
+    "Streak protected. Your partner earned nothing today. Everyone wins.",
     "Nice. Your wallet lives to fight another day.",
-    "Done. Your partner is mildly disappointed. 😏",
-    "Streak saved. Your partner is proud. (Probably.)"
+    "Done. Your partner is mildly disappointed. 😏"
   ],
-  "failure": [
-    "Someone just earned bubble tea. 🧋",
-    "Your wallet lost. Your partner won.",
-    "Push-ups: 0. Marriage: still alive. ❤️",
-    "Your partner just unlocked coffee money."
+  "skip": [
+    "Tough day. Your partner just won this round. 🏆",
+    "A skip day. Someone's coffee fund thanks you. 🧋",
+    "It happens. The streak resets — the fun doesn't."
   ],
-  "partner_watching": [
-    "Your wife is watching 👀",
-    "Your husband smells free coffee.",
-    "Your partner has entered the chat.",
-    "Your partner is waiting for free bubble tea. 🧋"
+  "lazy_tax_raised": [
+    "She believes in you. Probably.",
+    "Bold move by your final boss.",
+    "The stakes just got real. 😈"
   ],
-  "penalty_raised": [
-    "Good luck. 😈",
-    "Bold move. Your wallet felt that.",
-    "The stakes just got real."
+  "share_owed": [
+    "Time to get stronger.",
+    "My wife discovered passive income. Unfortunately, it's my laziness.",
+    "Send help. Or push-ups."
+  ],
+  "share_clean": [
+    "Untouchable. My partner earned nothing.",
+    "The green wall stands. 🟩",
+    "Streak intact, wallet intact."
   ]
 }

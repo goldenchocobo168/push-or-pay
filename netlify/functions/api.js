@@ -34,16 +34,23 @@ function view(c, role) {
     start_date: c.start_date,
     cheers: c.cheers || {},
     penalty_events: c.penalty_events || [],
+    sessions: c.sessions || {},   // for heatmap day-detail (reps/duration)
     ...m,
     partner_earned_display: money(m.partner_earned, c.currency),
     week_earned_display: money(m.week_earned, c.currency),
+    accepted: !!c.partner_accepted,   // has the watcher accepted?
   };
   if (role === "owner") {
-    base.invite_link = `/c/${c.id}?t=${c.partner_token}`;   // link the DOER can send the profiteer
-    // Prank alert: the doer opened a challenge someone set up FOR them.
-    base.prank_alert = (c.created_via === "prank" && m.done_total === 0 && !c.owner_seen);
-  } else {
-    base.doer_link = `/c/${c.id}?t=${c.owner_token}`;       // link the PROFITEER sends the doer (prank flow)
+    base.invite_link = `/c/${c.id}?t=${c.partner_token}`;
+    // "Your wife raised your Lazy Tax 🚨" banner: latest watcher change the owner hasn't seen.
+    const evs = c.penalty_events || [];
+    const lastWatcher = [...evs].reverse().find((e) => e.changed_by === "partner");
+    if (lastWatcher && (c.lazy_tax_ack_ts || 0) < lastWatcher.ts) {
+      base.lazy_tax_update = {
+        from: money(lastWatcher.from, c.currency),
+        to: money(lastWatcher.amount, c.currency),
+      };
+    }
   }
   return base;
 }
@@ -156,12 +163,23 @@ export default async (req) => {
 
     // ---- get ----------------------------------------------------------
     if (action === "get") {
-      const v = view(c, role);
-      let changed = false;
-      if (role === "partner" && !c.partner_first_seen) { c.partner_first_seen = Date.now(); changed = true; }
-      if (role === "owner" && !c.owner_seen) { c.owner_seen = true; changed = true; } // consume prank alert after first view
-      if (changed) await store.setJSON(id, c);
-      return json(v);
+      if (role === "partner" && !c.partner_first_seen) { c.partner_first_seen = Date.now(); await store.setJSON(id, c); }
+      return json(view(c, role));
+    }
+
+    // ---- accept (the watcher joins the game) -------------------------
+    if (action === "accept") {
+      if (role !== "partner") return json({ error: "only the watcher can accept" }, 403);
+      if (!c.partner_accepted) { c.partner_accepted = Date.now(); c.partner_first_seen = c.partner_first_seen || Date.now(); await store.setJSON(id, c); }
+      return json(view(c, role));
+    }
+
+    // ---- lazy_tax_ack (owner dismisses the "wife raised it" banner) --
+    if (action === "lazy_tax_ack") {
+      if (role !== "owner") return json({ error: "owner only" }, 403);
+      c.lazy_tax_ack_ts = Date.now();
+      await store.setJSON(id, c);
+      return json(view(c, role));
     }
 
     // ---- session (owner/doer saves a completed push-up session) -------
