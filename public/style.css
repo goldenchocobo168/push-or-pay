@@ -70,6 +70,7 @@ body::after {
 .nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
 .brand .logo { font-size: 20px; }
+.brand img.logo { width: 26px; height: 26px; border-radius: 8px; display: block; }
 
 /* ---------------- hero ---------------- */
 .hero { padding: 68px 0 40px; }

@@ -5,15 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Push or Pay — a tiny game you play with your wife</title>
   <meta name="description" content="Protect your streak. Skip a day and your partner collects the Lazy Tax. A playful little challenge for two." />
-  <meta property="og:title" content="Push or Pay 😈" />
-  <meta property="og:description" content="Skip your push-ups and your wife collects the Lazy Tax. Who profits when you skip?" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>" />
+  <meta property="og:title" content="Push or Pay — the couples streak game" />
+  <meta property="og:description" content="Skip your push-ups and your partner collects the Lazy Tax. Who profits when you skip?" />
+  <meta property="og:image" content="/assets/og.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="/assets/og.png" />
+  <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/assets/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="/assets/icon-192.png" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <nav class="nav">
     <div class="container">
-      <div class="brand"><span class="logo">💪</span> Push or Pay</div>
+      <div class="brand"><img class="logo" src="/assets/icon.svg" alt="" /> Push or Pay</div>
       <button class="btn" id="navStart">Start a challenge</button>
     </div>
   </nav>
@@ -102,7 +109,7 @@
   <!-- ===================== ONBOARDING ===================== -->
   <div id="onboard" class="container hidden">
     <div class="panel">
-      <div class="brand" style="justify-content:center;margin:24px 0"><span class="logo">💪</span> Push or Pay</div>
+      <div class="brand" style="justify-content:center;margin:24px 0"><img class="logo" src="/assets/icon.svg" alt="" /> Push or Pay</div>
 
       <div id="s-warn" class="step">
         <div class="card warn-card"><div class="emoji-xl">⚠️</div><p class="warn" id="warnLine">Do NOT show this app to your spouse… unless you're serious about building habits.</p></div>
@@ -127,8 +134,8 @@
                 <option value="£">🇬🇧 GBP</option><option value="€">🇪🇺 EUR</option><option value="₹">🇮🇳 INR</option>
               </select>
             </div>
-            <div class="field-row"><span class="fl">Lazy Tax 💸 <span style="color:var(--faint)">— they collect</span></span><input id="penalty" class="mini" type="number" min="1" value="10000" /></div>
-            <p class="hint" id="penaltyHint"></p>
+            <div class="field-row"><span class="fl">Lazy Tax 💸 <span style="color:var(--faint)">— they collect</span></span><input id="lazytax" class="mini" type="number" min="1" value="10000" /></div>
+            <p class="hint" id="lazytaxHint"></p>
           </div>
           <button class="btn block lg" type="submit" id="createBtn">Create challenge 😈</button>
           <p class="msg" id="msg"></p>
@@ -163,17 +170,17 @@
     document.getElementById("warnBtn").onclick=()=>{ toast(rnd(COPY.warning_ack)||"Your excuses have been notified 😈"); showStep("s-create"); };
 
     const USD_PER={ "$":1,"S$":0.74,"£":1.27,"€":1.08,"₹":0.012,"Rp":0.000064 };
-    function updateHint(){ const cur=document.getElementById("currency").value, amt=Number(document.getElementById("penalty").value)||0, hint=document.getElementById("penaltyHint");
+    function updateHint(){ const cur=document.getElementById("currency").value, amt=Number(document.getElementById("lazytax").value)||0, hint=document.getElementById("lazytaxHint");
       if(cur==="Rp"&&amt>=1000) hint.innerHTML=`Sounds scary… it's really just <b>≈ US$${(amt*USD_PER.Rp).toFixed(2)}</b> 😏`;
       else if(USD_PER[cur]&&cur!=="$"){ const u=amt*USD_PER[cur]; hint.textContent=`≈ US$${u<10?u.toFixed(1):u.toFixed(0)}`; } else hint.textContent=""; }
-    document.getElementById("currency").addEventListener("change",()=>{ const cur=document.getElementById("currency").value, pen=document.getElementById("penalty"); if(cur==="Rp"&&Number(pen.value)<1000) pen.value=10000; if(cur!=="Rp"&&Number(pen.value)===10000) pen.value=10; updateHint(); });
-    document.getElementById("penalty").addEventListener("input",updateHint); updateHint();
+    document.getElementById("currency").addEventListener("change",()=>{ const cur=document.getElementById("currency").value, pen=document.getElementById("lazytax"); if(cur==="Rp"&&Number(pen.value)<1000) pen.value=10000; if(cur!=="Rp"&&Number(pen.value)===10000) pen.value=10; updateHint(); });
+    document.getElementById("lazytax").addEventListener("input",updateHint); updateHint();
 
     document.getElementById("createForm").addEventListener("submit", async (e)=>{
       e.preventDefault(); const btn=document.getElementById("createBtn"), msg=document.getElementById("msg");
       btn.disabled=true; msg.textContent="Creating…"; msg.className="msg";
       try {
-        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name:document.getElementById("owner").value,partner_name:document.getElementById("partner").value,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("penalty").value,currency:document.getElementById("currency").value,created_via:"self"})});
+        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name:document.getElementById("owner").value,partner_name:document.getElementById("partner").value,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:"self"})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
         document.getElementById("sendLink").value=location.origin+d.invite_link;
         const partner=document.getElementById("partner").value||"your final boss";
