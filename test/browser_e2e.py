@@ -43,6 +43,7 @@ try:
     js("document.getElementById('warnBtn').click()"); time.sleep(0.5)
     check("create form shown", js("!document.getElementById('s-create').classList.contains('hidden')"))
     check("create title 'Create your challenge'", "challenge" in (js("document.querySelector('#s-create .title').textContent") or "").lower())
+    check("who-does-it mode toggle present", (js("document.querySelectorAll('#whoSeg button').length") or 0) == 2)
     check("currency defaults to Rupiah (IDR)", js("document.getElementById('currency').value") == "Rp")
     check("Lazy Tax label present (not 'penalty')", "lazy tax" in (js("document.querySelector('#s-create').innerText") or "").lower())
 
@@ -56,6 +57,7 @@ try:
     print("owner dashboard (streak -> challenge -> heatmap -> lazy tax order)")
     check("streak hero", js("!!document.querySelector('.hero-streak .days')"))
     check("today's challenge card", "challenge" in (js("document.querySelector('.today-card .goal').textContent") or "").lower())
+    check("free streak shows /30 cap", "/30" in (js("document.querySelector('.hero-streak .days').textContent") or ""))
     check("Lazy Tax card present", (js("document.querySelectorAll('.lazy-card').length") or 0) >= 1)
     check("shows Rp Lazy Tax", "Rp" in (js("document.querySelector('.lazy-card .lz-amt').textContent") or ""))
     check("heatmap 90 cells", (js("document.querySelectorAll('.heat .cell').length") or 0) == 90)
@@ -68,7 +70,7 @@ try:
     js("document.getElementById('doneBtn').click()"); time.sleep(3)
     check("complete: streak protected", "streak" in (js("document.body.innerText") or "").lower() and "protected" in (js("document.body.innerText") or "").lower())
     js("document.getElementById('okBtn').click()"); time.sleep(2.5)
-    check("streak now 1", str(js("document.querySelector('.hero-streak .days').textContent")).strip() == "1")
+    check("streak now 1 (shows 1/30)", str(js("document.querySelector('.hero-streak .days').textContent")).strip().startswith("1"))
 
     print("watcher: invitation -> accept -> watcher dashboard")
     goto(invite)

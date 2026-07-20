@@ -119,10 +119,15 @@
       <div id="s-create" class="step hidden">
         <h1 class="title">Create your challenge 😈</h1>
         <form id="createForm">
+          <div class="seg" id="whoSeg">
+            <button type="button" class="sel" data-mode="self">I'll do the push-ups</button>
+            <button type="button" data-mode="prank">Challenge my partner 😈</button>
+          </div>
+          <p class="hint center" id="whoHint" style="margin:0 0 12px">You do the reps. They watch and collect.</p>
           <div class="card">
-            <label for="owner">What should we call you?</label>
+            <label for="owner" id="lblOwner">What should we call you?</label>
             <input id="owner" placeholder="Sam" autocomplete="off" required />
-            <label for="partner">Who's your final boss? 😈</label>
+            <label for="partner" id="lblPartner">Who's your final boss? 😈</label>
             <input id="partner" placeholder="Wife ❤️" autocomplete="off" required />
           </div>
           <div class="card">
@@ -169,6 +174,19 @@
     ["navStart","heroStart","bandStart"].forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=openOnboard; });
     document.getElementById("warnBtn").onclick=()=>{ toast(rnd(COPY.warning_ack)||"Your excuses have been notified 😈"); showStep("s-create"); };
 
+    // who-does-it mode: self (I do reps) OR prank (I challenge my partner)
+    let mode="self";
+    document.querySelectorAll("#whoSeg button").forEach(b=>b.onclick=()=>{
+      mode=b.dataset.mode; document.querySelectorAll("#whoSeg button").forEach(x=>x.classList.toggle("sel",x===b));
+      const self=mode==="self";
+      document.getElementById("whoHint").textContent=self?"You do the reps. They watch and collect.":"They do the reps. You watch and collect the Lazy Tax. 😈";
+      document.getElementById("lblOwner").textContent=self?"What should we call you?":"Your name (you collect 😈)";
+      document.getElementById("lblPartner").textContent=self?"Who's your final boss? 😈":"Who are you challenging?";
+      document.getElementById("owner").placeholder=self?"Sam":"Wife ❤️";
+      document.getElementById("partner").placeholder=self?"Wife ❤️":"Husband";
+      document.getElementById("createBtn").textContent=self?"Create challenge 😈":"Send the challenge 😈";
+    });
+
     const USD_PER={ "$":1,"S$":0.74,"£":1.27,"€":1.08,"₹":0.012,"Rp":0.000064 };
     function updateHint(){ const cur=document.getElementById("currency").value, amt=Number(document.getElementById("lazytax").value)||0, hint=document.getElementById("lazytaxHint");
       if(cur==="Rp"&&amt>=1000) hint.innerHTML=`Sounds scary… it's really just <b>≈ US$${(amt*USD_PER.Rp).toFixed(2)}</b> 😏`;
@@ -180,12 +198,25 @@
       e.preventDefault(); const btn=document.getElementById("createBtn"), msg=document.getElementById("msg");
       btn.disabled=true; msg.textContent="Creating…"; msg.className="msg";
       try {
-        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name:document.getElementById("owner").value,partner_name:document.getElementById("partner").value,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:"self"})});
+        const nameA=document.getElementById("owner").value, nameB=document.getElementById("partner").value;
+        // API owner = the DOER, partner = the collector. In prank mode they swap.
+        const owner_name = mode==="prank" ? nameB : nameA;
+        const partner_name = mode==="prank" ? nameA : nameB;
+        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
-        document.getElementById("sendLink").value=location.origin+d.invite_link;
-        const partner=document.getElementById("partner").value||"your final boss";
-        document.getElementById("doneLead").textContent=`Now ${partner} gets to watch. Send them the invite 😈`;
-        document.getElementById("openBtn").onclick=()=>location.href=d.owner_link;
+        if(mode==="prank"){
+          // creator is the collector; send the DOER (partner) their link
+          document.getElementById("sendLink").value=location.origin+d.owner_link;
+          document.querySelector("#s-done .title").textContent="Challenge sent 😈";
+          document.getElementById("doneLead").innerHTML=`Send this to <b>${nameB||"them"}</b>. Picture their face when they open it… 😏`;
+          document.getElementById("openBtn").textContent="Open my (watcher) dashboard";
+          document.getElementById("openBtn").onclick=()=>location.href=d.invite_link;
+        } else {
+          document.getElementById("sendLink").value=location.origin+d.invite_link;
+          document.getElementById("doneLead").textContent=`Now ${nameB||"your final boss"} gets to watch. Send them the invite 😈`;
+          document.getElementById("openBtn").textContent="Open my dashboard";
+          document.getElementById("openBtn").onclick=()=>location.href=d.owner_link;
+        }
         showStep("s-done");
       } catch(err){ msg.textContent=err.message; msg.className="msg err"; btn.disabled=false; }
     });

@@ -7,9 +7,11 @@ function memStore() {
   const m = new Map();
   return { async setJSON(k, v) { m.set(k, JSON.stringify(v)); }, async get(k) { const s = m.get(k); return s == null ? null : JSON.parse(s); }, async list() { return { blobs: [...m.keys()].map((key) => ({ key })) }; } };
 }
-globalThis.__PP_STORE__ = memStore();
+const STORE = memStore();
+globalThis.__PP_STORE__ = STORE;
 process.env.PP_ADMIN_KEY = "testkey123";
 const { default: handler } = await import("../netlify/functions/api.js");
+const { addDays, todaySGT } = await import("../lib/penalty.mjs");
 
 let pass = 0;
 const ok = (c, n) => { assert.ok(c, n); console.log("  ✓", n); pass++; };
@@ -73,6 +75,44 @@ const st = await call("stats", { key: "testkey123" });
 eq(st.data.totals.signups, 1, "1 signup");
 eq(st.data.totals.total_sessions, 1, "1 session");
 ok(st.data.totals.partners_joined >= 1, "watcher activation counted");
+
+console.log("Secret Mode — 30-day cap, Day-19 reveal, unlock, hardcore");
+{
+  // seed a fresh challenge with 20 consecutive done days ending today
+  const sc = await call("create", {}, { owner_name: "Streaker", partner_name: "W", daily_target: 5, penalty_amount: 10, currency: "$", created_via: "self" });
+  const sid = sc.data.id, sTok = tokenOf(sc.data.owner_link);
+  const obj = await STORE.get(sid);
+  obj.sessions = {}; let d0 = todaySGT(); obj.start_date = addDays(d0, -25);
+  for (let i = 0; i < 20; i++) { obj.sessions[addDays(d0, -i)] = { reps: 6, target: 5 }; }
+  await STORE.setJSON(sid, obj);
+  const g = await call("get", { id: sid, t: sTok });
+  eq(g.data.display_streak, 20, "streak 20");
+  eq(g.data.secret_reveal, true, "Day-19 reveal fires at streak>=19");
+  // burn it (one-time)
+  await call("secret_seen", { id: sid, t: sTok }, {});
+  eq((await call("get", { id: sid, t: sTok })).data.secret_reveal, false, "reveal is one-time (burned)");
+  // unlock
+  const u = await call("unlock_secret", { id: sid, t: sTok }, {});
+  eq(u.data.secret_unlocked, true, "secret unlocked");
+  ok(u.data.hardcore_tier && u.data.hardcore_tier.name === "Iron", "Iron tier <100");
+
+  // cap: a non-unlocked 35-day streak displays 30 + challenge_complete
+  const cc = await call("create", {}, { owner_name: "Capped", partner_name: "W", daily_target: 5, penalty_amount: 10, currency: "$", created_via: "self" });
+  const cid = cc.data.id, cTok = tokenOf(cc.data.owner_link);
+  const cobj = await STORE.get(cid); cobj.sessions = {}; cobj.start_date = addDays(d0, -40);
+  for (let i = 0; i < 35; i++) cobj.sessions[addDays(d0, -i)] = { reps: 6, target: 5 };
+  await STORE.setJSON(cid, cobj);
+  const cg = await call("get", { id: cid, t: cTok });
+  eq(cg.data.display_streak, 30, "free streak caps at 30");
+  eq(cg.data.challenge_complete, true, "30-day challenge complete");
+}
+
+console.log("reverse-invite (prank mode) still supported");
+{
+  const p = await call("create", {}, { owner_name: "Victim", partner_name: "Prankster", daily_target: 10, penalty_amount: 10000, currency: "Rp", created_via: "prank" });
+  eq(p.data.created_via, "prank", "prank mode create");
+  ok(p.data.owner_link && p.data.invite_link, "both links returned (creator sends owner_link to the doer)");
+}
 
 console.log("guards");
 eq((await call("get", { id, t: "bad" })).status, 403, "bad token 403");

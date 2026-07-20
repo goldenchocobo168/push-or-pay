@@ -62,13 +62,26 @@
     const banner = d.lazy_tax_update
       ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
+    // hero varies by mode: normal (x/30) · challenge complete · Secret/Hardcore (uncapped + tier)
+    let heroTop, heroSub;
+    if (d.secret_unlocked) {
+      const t = d.hardcore_tier || {};
+      heroTop = `<div class="flame">🔥</div><div class="days">${d.display_streak}</div><div class="label">${esc(t.name || "Hardcore")} mode${t.next ? ` · ${t.next - d.display_streak} to ${t.next}` : ""}</div>`;
+      heroSub = `<div class="joke">🔓 Secret Mode. No 30-day limit. ${streakJoke}</div>`;
+    } else if (d.challenge_complete) {
+      heroTop = `<div class="flame">🎉</div><div class="days">30</div><div class="label">Challenge complete</div>`;
+      heroSub = `<div class="joke">You did the 30 days. Most people stop here… 👀</div>`;
+    } else {
+      heroTop = `<div class="flame">🔥</div><div class="days">${d.display_streak}<span class="cap">/30</span></div><div class="label">Day streak</div>`;
+      heroSub = `<div class="joke">${streakJoke}</div>`;
+    }
     app.innerHTML = `
       ${banner}
       <div class="app-grid">
         <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="hero-streak">
-            <div class="flame">🔥</div><div class="days">${d.streak}</div><div class="label">Day streak</div>
-            <div class="joke">${streakJoke}</div>
+          <div class="hero-streak${d.secret_unlocked ? " secret" : ""}">
+            ${heroTop}
+            ${heroSub}
           </div>
           <div class="card today-card">
             <div class="goal">Today's challenge</div>
@@ -246,7 +259,30 @@
     document.body.appendChild(wrap); setTimeout(() => wrap.remove(), 2600);
   }
 
-  function render(d) { if (d.role === "owner") renderOwnerDashboard(d); else if (d.accepted) renderWatcher(d); else renderInvitation(d); }
+  // ============ Secret Mode — the Day-19 one-time reveal ============
+  function renderSecretReveal(d) {
+    api("secret_seen").catch(() => {}); // burn it: appears once, never again
+    app.innerHTML = `
+      <div class="secret-veil">
+        <div class="secret-inner">
+          <div class="lock">🔒</div>
+          <p class="s-line">You found something most people never see.</p>
+          <p class="s-big">You've reached <b>Day ${d.display_streak}</b>.</p>
+          <p class="s-line">There is a hidden mode. Only the disciplined unlock it.</p>
+          <p class="s-warn">This message appears once. Choose now.</p>
+          <button class="btn fire lg" id="enterSecret">Enter Secret Mode</button>
+          <button class="btn ghost" id="notYet">Not yet…</button>
+        </div>
+      </div>`;
+    document.getElementById("enterSecret").onclick = async () => { try { const nd = await api("unlock_secret", {}); toast("🔥 Secret Mode unlocked. No limits now."); renderOwnerDashboard(nd); } catch (e) { toast(e.message); } };
+    document.getElementById("notYet").onclick = () => renderOwnerDashboard({ ...d, secret_reveal: false });
+  }
+
+  function render(d) {
+    if (d.role === "owner") { if (d.secret_reveal) return renderSecretReveal(d); return renderOwnerDashboard(d); }
+    if (d.accepted) return renderWatcher(d);
+    return renderInvitation(d);
+  }
 
   if (!id || !token) { app.innerHTML = errHtml("This link is missing its access token. Ask for the full link."); return; }
   Promise.all([fetch("/copy.json").then(r => r.json()).catch(() => ({})), api("get")]).then(([c, d]) => {
