@@ -6,6 +6,6 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 Environment=PP_DRI_SHIP=0
-Environment=TIBO_POST_HOURS=01 09 17
+Environment="TIBO_POST_HOURS=01 09 17"
 ExecStart=/bin/bash /root/push-or-pay/dri/rsi.sh
 TimeoutStartSec=2600
