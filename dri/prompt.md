@@ -54,9 +54,13 @@ funny copy lives in `public/copy.json` (static, no AI).
    test, a distribution action) and **deliberately vary ONE lever**, logging what you varied + a
    confidence + the metric you expect to move, to `dri/journal/decisions.jsonl`. Over cycles this
    teaches you which lever moves active-pairs/shared.
-5. **SELF-HEAL** — `curl` the live site + `/api?action=get` on a scratch challenge; if anything is
-   broken, fix it FIRST (before any new feature). A cron/exit-0 is not "working" — verify by real
-   output freshness.
+5. **SELF-HEAL** — `curl` the live site. For the scratch-challenge check, **reuse the persisted
+   challenge in `dri/.scratch-challenge-id`** (`source` it, then `GET
+   /api?action=get&id=$id&t=$owner_token`) — **GET-only, never `POST action=create` a fresh one**;
+   that was silently adding one synthetic signup per cycle until cycle 33 caught it (issue #10). Only
+   create a new scratch challenge if the file is missing/its id 404s, and re-persist it immediately
+   if you do. If anything is broken, fix it FIRST (before any new feature). A cron/exit-0 is not
+   "working" — verify by real output freshness.
 6. **REPORT** — append a structured entry to `dri/journal/<UTC-date>.md` using the template below,
    and one atomic line to `~/.openclaw/shared/raw/<UTC-date>.md` prefixed `[Tibo/PushOrPay]`.
    Telegram to Sam ONLY on P0/P1 (site down, data loss risk) — never routine.
