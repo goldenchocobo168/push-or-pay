@@ -20,7 +20,7 @@ echo "[deploy] draft id $DID — promoting to production…"
 netlify api restoreSiteDeploy --data "{\"site_id\":\"$SITE_ID\",\"deploy_id\":\"$DID\"}" >/dev/null
 echo "[deploy] promoted. verifying live…"
 sleep 3
-CODE="$(curl -s -o /dev/null -w '%{http_code}' https://push-or-pay-app.netlify.app/)"
+CODE="$(curl -s -o /dev/null -w '%{http_code}' https://pushorpay.netlify.app/)"
 echo "[deploy] live landing HTTP $CODE"
 [ "$CODE" = "200" ] || { echo "[deploy] verify FAILED"; exit 1; }
-echo "[deploy] ✅ done: https://push-or-pay-app.netlify.app"
+echo "[deploy] ✅ done: https://pushorpay.netlify.app"
