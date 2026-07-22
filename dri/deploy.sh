@@ -8,6 +8,13 @@ SITE_ID="6d2427bd-6fbf-46d0-98cc-cc5dad6c9347"
 PROJ="/root/push-or-pay"
 cd "$PROJ"
 
+# node/npm/netlify only resolve via ~/.hermes/node/bin, which .profile adds to
+# PATH for interactive shells. The systemd oneshot service that invokes this
+# script (via the claude agent) never sources .profile, so without this the
+# npm test gate below fails with "command not found" and false-aborts every
+# deploy. See issue #27.
+export PATH="/root/.hermes/node/bin:$PATH"
+
 echo "[deploy] npm test gate…"
 npm test >/dev/null 2>&1 || { echo "[deploy] TESTS FAILED — aborting deploy"; exit 1; }
 
