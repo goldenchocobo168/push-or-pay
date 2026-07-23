@@ -246,7 +246,7 @@
     sb.onclick = async () => {
       const text = d.partner_earned > 0
         ? `😭 ${d.partner_name} earned ${d.week_earned_display} this week off my skipped push-ups. ${pick(COPY.share_owed)} Push or Pay.`
-        : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. Push or Pay.`;
+        : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. ${pick(COPY.share_clean)} Push or Pay.`;
       api("share").catch(() => {});
       if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
       else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
