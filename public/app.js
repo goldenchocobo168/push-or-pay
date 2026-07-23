@@ -150,10 +150,11 @@
           <div class="prog">${reps} push-ups${reps > d.daily_target ? ` · +${reps - d.daily_target} bonus 💪` : ""}</div>
           <div class="hint">Duration ${fmtDur(dur)} · ${esc(d.partner_name)} earned ${esc(money2(0, d.currency))} today 😂</div>
           <button class="btn block lg" id="okBtn" style="margin-top:16px">Back to my streak</button>
+          ${hit ? `<button class="btn ghost block" id="shareBtn" style="margin-top:10px">Share this streak 📣</button>` : ""}
         </div>
       </div>`;
     document.getElementById("okBtn").onclick = () => renderOwnerDashboard(d);
-    if (hit) confetti();
+    if (hit) { confetti(); wireShare(d); }
   }
 
   // ============ PARTNER — invitation → accept → watcher ============
