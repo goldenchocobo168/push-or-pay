@@ -31,7 +31,7 @@
       <div class="container hero-grid">
         <div class="hero-copy">
           <span class="eyebrow">😈 A tiny game for two</span>
-          <h1 class="display">Who profits<br/>when you <span class="grad">skip?</span></h1>
+          <h1 class="display" id="heroHook">Who profits<br/>when you <span class="grad">skip?</span></h1>
           <p class="sub">Do a little daily habit and keep your streak alive. Skip a day, and the person you love collects the Lazy Tax — then gets to cheer, tease, and raise the stakes.</p>
           <div class="cta-row">
             <button class="btn lg" id="heroStart">Start a challenge</button>
@@ -166,7 +166,12 @@
 
     let COPY = {};
     const rnd = (a) => a && a.length ? a[Math.floor(Math.random()*a.length)] : "";
-    fetch("/copy.json").then(r=>r.json()).then(c=>{ COPY=c; const w=rnd(c.warning); if(w) document.getElementById("warnLine").textContent=w; }).catch(()=>{});
+    fetch("/copy.json").then(r=>r.json()).then(c=>{
+      COPY=c;
+      const w=rnd(c.warning); if(w) document.getElementById("warnLine").textContent=w;
+      const hk=rnd(c.hook); const heroEl=document.getElementById("heroHook");
+      if(hk && hk!==c.hook[0] && heroEl) heroEl.textContent=hk;
+    }).catch(()=>{});
 
     const toast = (t) => { const e=document.getElementById("toast"); e.textContent=t; e.classList.add("show"); setTimeout(()=>e.classList.remove("show"),2200); };
     const showStep = (id) => { document.querySelectorAll("#onboard .step").forEach(s=>s.classList.toggle("hidden", s.id!==id)); window.scrollTo(0,0); };
