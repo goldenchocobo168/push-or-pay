@@ -20,7 +20,7 @@ npm test >/dev/null 2>&1 || { echo "[deploy] TESTS FAILED — aborting deploy"; 
 
 echo "[deploy] draft deploy…"
 OUT="$(netlify deploy --dir=public --functions=netlify/functions 2>&1)"
-DID="$(echo "$OUT" | grep -oE '[0-9a-f]{24}--push-or-pay' | head -1 | cut -d- -f1)"
+DID="$(echo "$OUT" | grep -oE '[0-9a-f]{24}--pushorpay' | head -1 | cut -d- -f1)"
 if [ -z "$DID" ]; then echo "[deploy] could not parse deploy id"; echo "$OUT" | tail -5; exit 1; fi
 echo "[deploy] draft id $DID — promoting to production…"
 
