@@ -164,13 +164,16 @@
   <script>
     (function(){ let h=""; for(let i=0;i<39;i++){ const r=Math.random(); h+=`<i class="${r>.9?'miss':r>.14?'on':''}"></i>`; } var el=document.getElementById('dvHeat'); if(el) el.innerHTML=h; })();
 
-    let COPY = {};
+    let COPY = {}, heroHookIdx = 0;
     const rnd = (a) => a && a.length ? a[Math.floor(Math.random()*a.length)] : "";
     fetch("/copy.json").then(r=>r.json()).then(c=>{
       COPY=c;
       const w=rnd(c.warning); if(w) document.getElementById("warnLine").textContent=w;
-      const hk=rnd(c.hook); const heroEl=document.getElementById("heroHook");
-      if(hk && hk!==c.hook[0] && heroEl) heroEl.textContent=hk;
+      if (c.hook && c.hook.length) {
+        heroHookIdx = Math.floor(Math.random()*c.hook.length);
+        const hk = c.hook[heroHookIdx], heroEl=document.getElementById("heroHook");
+        if(hk && heroHookIdx!==0 && heroEl) heroEl.textContent=hk;
+      }
     }).catch(()=>{});
 
     const toast = (t) => { const e=document.getElementById("toast"); e.textContent=t; e.classList.add("show"); setTimeout(()=>e.classList.remove("show"),2200); };
@@ -207,7 +210,7 @@
         // API owner = the DOER, partner = the collector. In prank mode they swap.
         const owner_name = mode==="prank" ? nameB : nameA;
         const partner_name = mode==="prank" ? nameA : nameB;
-        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode})});
+        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode,hook_variant:heroHookIdx})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
         if(mode==="prank"){
           // creator is the collector; send the DOER (partner) their link

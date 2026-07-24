@@ -54,6 +54,8 @@ def observe():
         "activation_rate": t.get("activation_rate", 0),
         "active_last_7d": t.get("active_last_7d", 0),
         "sessions_by_via": via_signal,
+        "sessions_by_hook_variant": t.get("sessions_by_hook_variant", {}),
+        "shares_by_cta_variant": t.get("shares_by_cta_variant", {}),
     }
 
 def calibrate(obs):
