@@ -31,11 +31,15 @@ def observe():
     s = fetch_stats()
     t = s.get("totals", {})
     recent = s.get("recent", [])
-    active_pairs = sum(1 for c in recent if c.get("partner_joined") and c.get("sessions", 0) >= 3)
-    by_via = {}
-    for c in recent:
-        by_via.setdefault(c.get("via", "self"), []).append(c.get("sessions", 0))
-    via_signal = {k: round(sum(v) / len(v), 2) for k, v in by_via.items() if v}
+    if "active_pairs" in t:
+        active_pairs = t["active_pairs"]
+        via_signal = t.get("sessions_by_via", {})
+    else:  # back-compat if stats endpoint hasn't shipped the server-side fields yet
+        active_pairs = sum(1 for c in recent if c.get("partner_joined") and c.get("sessions", 0) >= 3)
+        by_via = {}
+        for c in recent:
+            by_via.setdefault(c.get("via", "self"), []).append(c.get("sessions", 0))
+        via_signal = {k: round(sum(v) / len(v), 2) for k, v in by_via.items() if v}
     return {
         "ts": int(time.time()),
         "shared": t.get("shares", 0),

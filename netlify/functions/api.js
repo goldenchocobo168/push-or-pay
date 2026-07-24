@@ -135,7 +135,8 @@ export default async (req) => {
       const { blobs } = await store.list();
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
-      const byDay = {}, recent = [];
+      let activePairs = 0;
+      const byDay = {}, recent = [], byVia = {};
       for (const b of blobs) {
         const c = await store.get(b.key, { type: "json" });
         if (!c || !c.id) continue;
@@ -150,21 +151,28 @@ export default async (req) => {
         if (days.length >= 2) retained2++;
         if (days.length >= 7) retained7++;
         if (days.some((d) => (Date.parse(today) - Date.parse(d)) / 86400000 <= 7)) activeLast7++;
+        const partnerJoined = !!c.partner_first_seen;
+        if (partnerJoined && days.length >= 3) activePairs++;
+        const via = c.created_via || "self";
+        (byVia[via] ||= []).push(days.length);
         const day = c.start_date || (c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "?");
         byDay[day] = (byDay[day] || 0) + 1;
         const m = compute(c);
         recent.push({ id: c.id, owner: c.owner_name, partner: c.partner_name, target: c.daily_target,
           penalty: c.penalty_amount, currency: c.currency, via: c.created_via, streak: m.streak,
           sessions: days.length, missed: m.missed_count, earned: m.partner_earned, shares: c.share_count || 0,
-          partner_joined: !!c.partner_first_seen, created: c.created_at || 0 });
+          partner_joined: partnerJoined, created: c.created_at || 0 });
       }
       recent.sort((a, b) => (b.created || 0) - (a.created || 0));
+      const sessionsByVia = {};
+      for (const [k, v] of Object.entries(byVia)) sessionsByVia[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
       const series = [];
       for (let i = 29; i >= 0; i--) { const d = new Date(Date.parse(today) - i * 86400000).toISOString().slice(0, 10); series.push({ date: d, count: byDay[d] || 0 }); }
       return json({
         totals: {
           signups, pranks, partners_joined: partners, total_sessions: totalSessions, shares,
           activated, active_last_7d: activeLast7,
+          active_pairs: activePairs, sessions_by_via: sessionsByVia,
           retention_2d: signups ? +(retained2 / signups * 100).toFixed(1) : 0,
           retention_7d: signups ? +(retained7 / signups * 100).toFixed(1) : 0,
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,
