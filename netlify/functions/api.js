@@ -94,6 +94,9 @@ export default async (req) => {
       penalty = Math.min(100000000, Math.max(1, penalty));
       const created_via = b.created_via === "prank" ? "prank" : "self";
       const is_test = !!(TEST_KEY && req.headers.get("x-tibo-test-key") === TEST_KEY);
+      let hook_variant = Math.round(Number(b.hook_variant));
+      if (!Number.isFinite(hook_variant) || hook_variant < 0) hook_variant = 0;
+      hook_variant = Math.min(9, hook_variant);
 
       const c = {
         id: newId(),
@@ -103,6 +106,7 @@ export default async (req) => {
         currency,
         created_via,
         is_test,
+        hook_variant,
         owner_token: randomUUID(),
         partner_token: randomUUID(),
         start_date: todaySGT(),
@@ -136,7 +140,7 @@ export default async (req) => {
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
       let activePairs = 0;
-      const byDay = {}, recent = [], byVia = {};
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {};
       for (const b of blobs) {
         const c = await store.get(b.key, { type: "json" });
         if (!c || !c.id) continue;
@@ -155,6 +159,8 @@ export default async (req) => {
         if (partnerJoined && days.length >= 3) activePairs++;
         const via = c.created_via || "self";
         (byVia[via] ||= []).push(days.length);
+        if (c.hook_variant !== undefined && c.hook_variant !== null) (byHook[c.hook_variant] ||= []).push(days.length);
+        if (c.shares_by_cta) for (const [k, v] of Object.entries(c.shares_by_cta)) ctaTotals[k] = (ctaTotals[k] || 0) + v;
         const day = c.start_date || (c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "?");
         byDay[day] = (byDay[day] || 0) + 1;
         const m = compute(c);
@@ -166,6 +172,8 @@ export default async (req) => {
       recent.sort((a, b) => (b.created || 0) - (a.created || 0));
       const sessionsByVia = {};
       for (const [k, v] of Object.entries(byVia)) sessionsByVia[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
+      const sessionsByHook = {};
+      for (const [k, v] of Object.entries(byHook)) sessionsByHook[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
       const series = [];
       for (let i = 29; i >= 0; i--) { const d = new Date(Date.parse(today) - i * 86400000).toISOString().slice(0, 10); series.push({ date: d, count: byDay[d] || 0 }); }
       return json({
@@ -173,6 +181,7 @@ export default async (req) => {
           signups, pranks, partners_joined: partners, total_sessions: totalSessions, shares,
           activated, active_last_7d: activeLast7,
           active_pairs: activePairs, sessions_by_via: sessionsByVia,
+          sessions_by_hook_variant: sessionsByHook, shares_by_cta_variant: ctaTotals,
           retention_2d: signups ? +(retained2 / signups * 100).toFixed(1) : 0,
           retention_7d: signups ? +(retained7 / signups * 100).toFixed(1) : 0,
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,
@@ -285,7 +294,17 @@ export default async (req) => {
 
     // ---- share (virality signal) -------------------------------------
     if (action === "share") {
+      const b = await req.json().catch(() => ({}));
       c.share_count = Number(c.share_count || 0) + 1;
+      const cta_pool = b.cta_pool === "owed" ? "owed" : "clean";
+      let cta_variant = Math.round(Number(b.cta_variant));
+      if (!Number.isFinite(cta_variant) || cta_variant < 0) cta_variant = 0;
+      cta_variant = Math.min(9, cta_variant);
+      if (b.cta_variant !== undefined) {
+        c.shares_by_cta = c.shares_by_cta || {};
+        const key = `${cta_pool}:${cta_variant}`;
+        c.shares_by_cta[key] = (c.shares_by_cta[key] || 0) + 1;
+      }
       await store.setJSON(id, c);
       return json({ ok: true, shares: c.share_count });
     }

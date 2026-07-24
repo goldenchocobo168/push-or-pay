@@ -14,7 +14,8 @@
 
   const toast = (t) => { toastEl.textContent = t; toastEl.classList.add("show"); setTimeout(() => toastEl.classList.remove("show"), 2200); };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const pick = (arr) => (arr && arr.length ? arr[Math.abs(seed) % arr.length] : "");
+  const pickIdx = (arr) => (arr && arr.length ? Math.abs(seed) % arr.length : 0);
+  const pick = (arr) => (arr && arr.length ? arr[pickIdx(arr)] : "");
   const money2 = (a, cur) => { cur = cur || "$"; const n = cur === "Rp" ? Number(a).toLocaleString("en-US") : a; return `${cur}${cur === "Rp" ? " " : ""}${n}`; };
   const fmtDur = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
   const niceDate = (iso) => { const [y, m, dd] = iso.split("-"); return new Date(Date.UTC(+y, +m - 1, +dd)).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
@@ -244,10 +245,13 @@
   function wireShare(d) {
     const sb = document.getElementById("shareBtn"); if (!sb) return;
     sb.onclick = async () => {
-      const text = d.partner_earned > 0
+      const owed = d.partner_earned > 0;
+      const pool = owed ? COPY.share_owed : COPY.share_clean;
+      const variant = pickIdx(pool);
+      const text = owed
         ? `😭 ${d.partner_name} earned ${d.week_earned_display} this week off my skipped push-ups. ${pick(COPY.share_owed)} Push or Pay.`
         : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. ${pick(COPY.share_clean)} Push or Pay.`;
-      api("share").catch(() => {});
+      api("share", { cta_pool: owed ? "owed" : "clean", cta_variant: variant }).catch(() => {});
       if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
       else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
     };
