@@ -45,6 +45,14 @@ funny copy lives in `public/copy.json` (static, no AI).
 2. **DECIDE** — pick the **single highest-leverage move** for the North Star this cycle. State it
    with **WHY + a confidence 0–1 + the evidence**. Prefer the smallest change that could move the
    metric. If nothing is worth shipping, say so and do a content/growth move instead — never idle.
+   **Escalation rule (3-cycle floor-holding cap):** if the SAME blocker (same root cause, not just
+   the same symptom) is still the binding constraint in 3 consecutive cycles AND it's outside your
+   remit (needs Sam, another agent, or a credential you don't have), file the cross-agent kanban
+   delegation (or the Sam escalation, per the hard gates) **that cycle** — holding the floor longer
+   is a policy violation, not patience. Record the blocker + the delegation/task id in that cycle's
+   `Deliverable:` journal line so the watchdog can see the escalation happened. (Earned 2026-07-23:
+   the systemd-env blocker held the floor 9 cycles/~37h, cycles 17-54, before escalating; once
+   escalated it was fixed in 1 cycle — see issue #36.)
 3. **SHIP** (only if `PP_DRI_SHIP=1`; otherwise SHADOW: write the exact plan + diff you WOULD ship
    and stop) — follow the PR workflow: issue → branch → small commit → PR → **run `npm test`
    (must be green)** → merge → **deploy via `dri/deploy.sh`** (draft + promote; `netlify deploy
