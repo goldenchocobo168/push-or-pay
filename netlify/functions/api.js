@@ -132,6 +132,15 @@ export default async (req) => {
       });
     }
 
+    // ---- visit (fire-and-forget homepage-load ping; no PII, no cookies) --
+    if (action === "visit") {
+      const vKey = `visits:${todaySGT()}`;
+      const cur = (await store.get(vKey, { type: "json" })) || { count: 0 };
+      cur.count = Number(cur.count || 0) + 1;
+      await store.setJSON(vKey, cur);
+      return json({ ok: true });
+    }
+
     // ---- stats (admin) ------------------------------------------------
     if (action === "stats") {
       const key = url.searchParams.get("key") || "";
@@ -139,9 +148,17 @@ export default async (req) => {
       const { blobs } = await store.list();
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
-      let activePairs = 0;
-      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {};
+      let activePairs = 0, visitsTotal = 0;
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {};
       for (const b of blobs) {
+        if (b.key.startsWith("visits:")) {
+          const v = await store.get(b.key, { type: "json" });
+          const day = b.key.slice("visits:".length);
+          const count = Number((v && v.count) || 0);
+          visitsByDay[day] = count;
+          visitsTotal += count;
+          continue;
+        }
         const c = await store.get(b.key, { type: "json" });
         if (!c || !c.id) continue;
         if (c.is_test) continue; // exclude tagged E2E/verification rows from all North Star totals
@@ -176,6 +193,8 @@ export default async (req) => {
       for (const [k, v] of Object.entries(byHook)) sessionsByHook[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
       const series = [];
       for (let i = 29; i >= 0; i--) { const d = new Date(Date.parse(today) - i * 86400000).toISOString().slice(0, 10); series.push({ date: d, count: byDay[d] || 0 }); }
+      const visitsSeries = [];
+      for (let i = 29; i >= 0; i--) { const d = new Date(Date.parse(today) - i * 86400000).toISOString().slice(0, 10); visitsSeries.push({ date: d, count: visitsByDay[d] || 0 }); }
       return json({
         totals: {
           signups, pranks, partners_joined: partners, total_sessions: totalSessions, shares,
@@ -186,8 +205,9 @@ export default async (req) => {
           retention_7d: signups ? +(retained7 / signups * 100).toFixed(1) : 0,
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,
           partner_join_rate: signups ? +(partners / signups * 100).toFixed(1) : 0,
+          visits_total: visitsTotal,
         },
-        signups_by_day: series, recent: recent.slice(0, 60),
+        signups_by_day: series, visits_by_day: visitsSeries, recent: recent.slice(0, 60),
       });
     }
 

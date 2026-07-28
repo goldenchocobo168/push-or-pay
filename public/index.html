@@ -180,6 +180,10 @@
   <script>
     (function(){ let h=""; for(let i=0;i<39;i++){ const r=Math.random(); h+=`<i class="${r>.9?'miss':r>.14?'on':''}"></i>`; } var el=document.getElementById('dvHeat'); if(el) el.innerHTML=h; })();
 
+    // Fire-and-forget visit ping (no PII, no cookies) — lets stats distinguish
+    // "no one visits" from "people visit but don't sign up".
+    try { fetch("/api?action=visit", { method: "POST", keepalive: true }); } catch(_){}
+
     let COPY = {}, heroHookIdx = 0;
     const rnd = (a) => a && a.length ? a[Math.floor(Math.random()*a.length)] : "";
     fetch("/copy.json").then(r=>r.json()).then(c=>{
