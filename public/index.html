@@ -266,7 +266,13 @@
         showStep("s-done");
       } catch(err){ msg.textContent=err.message; msg.className="msg err"; btn.disabled=false; }
     });
-    document.getElementById("copySend").onclick=async()=>{ const i=document.getElementById("sendLink"); try{await navigator.clipboard.writeText(i.value);}catch(_){i.select();document.execCommand("copy");} toast(rnd(COPY.invite_sent)||"Invite sent. There is no turning back now 😈"); };
+    document.getElementById("copySend").onclick=async()=>{
+      const i=document.getElementById("sendLink");
+      const ownerVal=document.getElementById("owner").value;
+      const text = mode==="prank" ? `${ownerVal||"Someone"} just challenged you to Push or Pay 😈` : `Come be my final boss on Push or Pay 😈`;
+      if (navigator.share) { try { await navigator.share({ title:"Push or Pay", text, url:i.value }); return; } catch(_){} }
+      try{await navigator.clipboard.writeText(i.value);}catch(_){i.select();document.execCommand("copy");} toast(rnd(COPY.invite_sent)||"Invite sent. There is no turning back now 😈");
+    };
   </script>
 </body>
 </html>

@@ -111,7 +111,11 @@
         </div>
       </div>`;
     const sb = document.getElementById("startBtn"); if (sb) sb.onclick = () => renderSession(d);
-    const ci = document.getElementById("copyInvite"); if (ci) ci.onclick = () => copy(document.getElementById("inviteInput").value, "Invite copied 📋 — send it over 😈");
+    const ci = document.getElementById("copyInvite"); if (ci) ci.onclick = async () => {
+      const url = document.getElementById("inviteInput").value;
+      if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text: `${d.partner_name}, you're my final boss on Push or Pay 😈`, url }); return; } catch (_) {} }
+      copy(url, "Invite copied 📋 — send it over 😈");
+    };
     const ack = document.getElementById("ackBtn"); if (ack) ack.onclick = async () => { try { render(await api("lazy_tax_ack", {})); } catch (e) { toast(e.message); } };
     wireHeat(d); wireShare(d);
   }
