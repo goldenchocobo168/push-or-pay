@@ -8,6 +8,9 @@ export const config = { path: "/api" };
 const MAX_NAME = 40;
 const ADMIN_KEY = process.env.PP_ADMIN_KEY || "";
 const TEST_KEY = process.env.TIBO_TEST_KEY || "";
+// Privacy-preserving referrer buckets — never store the raw referrer URL,
+// only which known category it fell into (client already collapses to this set).
+const REF_CATEGORIES = new Set(["direct", "google", "reddit", "hn", "twitter", "github", "other"]);
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -134,9 +137,13 @@ export default async (req) => {
 
     // ---- visit (fire-and-forget homepage-load ping; no PII, no cookies) --
     if (action === "visit") {
+      const b = await req.json().catch(() => ({}));
+      const ref = REF_CATEGORIES.has(b.ref) ? b.ref : "other";
       const vKey = `visits:${todaySGT()}`;
-      const cur = (await store.get(vKey, { type: "json" })) || { count: 0 };
+      const cur = (await store.get(vKey, { type: "json" })) || { count: 0, by_ref: {} };
       cur.count = Number(cur.count || 0) + 1;
+      cur.by_ref = cur.by_ref || {};
+      cur.by_ref[ref] = Number(cur.by_ref[ref] || 0) + 1;
       await store.setJSON(vKey, cur);
       return json({ ok: true });
     }
@@ -149,7 +156,7 @@ export default async (req) => {
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
       let activePairs = 0, visitsTotal = 0;
-      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {};
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {};
       for (const b of blobs) {
         if (b.key.startsWith("visits:")) {
           const v = await store.get(b.key, { type: "json" });
@@ -157,6 +164,7 @@ export default async (req) => {
           const count = Number((v && v.count) || 0);
           visitsByDay[day] = count;
           visitsTotal += count;
+          if (v && v.by_ref) for (const [k, n] of Object.entries(v.by_ref)) visitsByRef[k] = (visitsByRef[k] || 0) + Number(n || 0);
           continue;
         }
         const c = await store.get(b.key, { type: "json" });
@@ -206,6 +214,7 @@ export default async (req) => {
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,
           partner_join_rate: signups ? +(partners / signups * 100).toFixed(1) : 0,
           visits_total: visitsTotal,
+          visits_by_ref: visitsByRef,
         },
         signups_by_day: series, visits_by_day: visitsSeries, recent: recent.slice(0, 60),
       });

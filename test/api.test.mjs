@@ -70,8 +70,9 @@ ok(ch.data.cheers[ch.data.today].length === 1, "cheer recorded");
 eq((await call("share", { id, t: ownerT })).data.shares, 1, "share counted");
 
 console.log("visit ping");
-eq((await call("visit", {}, {})).data.ok, true, "visit ping ok");
-eq((await call("visit", {}, {})).data.ok, true, "visit ping ok (2nd)");
+eq((await call("visit", {}, { ref: "direct" })).data.ok, true, "visit ping ok");
+eq((await call("visit", {}, { ref: "reddit" })).data.ok, true, "visit ping ok (2nd, reddit ref)");
+eq((await call("visit", {}, { ref: "totally-not-a-category" })).data.ok, true, "visit ping ok (3rd, unknown ref folds to other)");
 
 console.log("stats");
 eq((await call("stats", {})).status, 401, "stats needs key");
@@ -79,9 +80,12 @@ const st = await call("stats", { key: "testkey123" });
 eq(st.data.totals.signups, 1, "1 signup");
 eq(st.data.totals.total_sessions, 1, "1 session");
 ok(st.data.totals.partners_joined >= 1, "watcher activation counted");
-eq(st.data.totals.visits_total, 2, "2 visits counted");
+eq(st.data.totals.visits_total, 3, "3 visits counted");
 ok(Array.isArray(st.data.visits_by_day) && st.data.visits_by_day.length === 30, "visits_by_day 30-day series");
-eq(st.data.visits_by_day[st.data.visits_by_day.length - 1].count, 2, "today's visits bucket has 2");
+eq(st.data.visits_by_day[st.data.visits_by_day.length - 1].count, 3, "today's visits bucket has 3");
+eq(st.data.totals.visits_by_ref.direct, 1, "1 direct visit (no ref sent)");
+eq(st.data.totals.visits_by_ref.reddit, 1, "1 reddit visit");
+eq(st.data.totals.visits_by_ref.other, 1, "unknown ref category folds to other");
 
 console.log("Secret Mode — 30-day cap, Day-19 reveal, unlock, hardcore");
 {
