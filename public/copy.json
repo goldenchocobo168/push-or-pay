@@ -61,5 +61,15 @@
     "Same time tomorrow. Don't let it get comfortable. 🔥",
     "Tomorrow's push-ups are already waiting for you. 👀",
     "One down. Skip tomorrow and it's their payday. 😈"
+  ],
+  "push_prompt": [
+    "🔔 Nudge me before I forget tomorrow",
+    "🔔 Tap me on the shoulder if I'm about to skip",
+    "🔔 Don't let me accidentally fund their bubble tea"
+  ],
+  "push_enabled": [
+    "Locked in. We'll ping you if today's about to slip. 😈",
+    "Noted. Consider yourself watched (by us too, now). 👀",
+    "Reminder set. No more \"I forgot.\" 🔥"
   ]
 }

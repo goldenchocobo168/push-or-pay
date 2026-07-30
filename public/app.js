@@ -7,10 +7,28 @@
   const id = parts[parts.length - 1];
   const token = new URLSearchParams(location.search).get("t") || "";
   let COPY = {}, seed = 0;
+  const VAPID_PUBLIC_KEY = "BDAI7fbZBLRikRquNoMUucL9jTeej544F5xJLSf_Z8cShLOeGKivTvUP225lAvrOm1kCbNfRPaD5HbnPahMo7AI";
 
   const api = (action, body) => fetch(`/api?action=${action}&id=${encodeURIComponent(id)}&t=${encodeURIComponent(token)}`, {
     method: body ? "POST" : "GET", headers: body ? { "content-type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined,
   }).then(async (r) => { const d = await r.json(); if (!r.ok) throw new Error(d.error || "error"); return d; });
+
+  // ============ push reminders (opt-in, once, after a logged session) ============
+  const urlB64ToUint8Array = (b64) => {
+    const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+    const base64 = (b64 + pad).replace(/-/g, "+").replace(/_/g, "/");
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+  };
+  const pushDismissedKey = () => `pp_push_dismissed_${id}`;
+  const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  async function enablePush() {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") throw new Error("no thanks noted");
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC_KEY) });
+    await api("push_subscribe", { subscription: sub.toJSON() });
+  }
 
   const toast = (t) => { toastEl.textContent = t; toastEl.classList.add("show"); setTimeout(() => toastEl.classList.remove("show"), 2200); };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -157,10 +175,26 @@
           <div class="hint" style="margin-top:6px">${esc(pick(COPY.come_back))}</div>
           <button class="btn block lg" id="okBtn" style="margin-top:16px">Back to my streak</button>
           ${hit ? `<button class="btn ghost block" id="shareBtn" style="margin-top:10px">Share this streak 📣</button>` : ""}
+          ${showPushPrompt(d) ? `<button class="btn ghost block" id="notifyBtn" style="margin-top:10px">${esc(pick(COPY.push_prompt))}</button>` : ""}
         </div>
       </div>`;
     document.getElementById("okBtn").onclick = () => renderOwnerDashboard(d);
     if (hit) { confetti(); wireShare(d); }
+    wirePushPrompt(d);
+  }
+
+  function showPushPrompt(d) {
+    return pushSupported() && !d.push_enabled && Notification.permission === "default" && !localStorage.getItem(pushDismissedKey());
+  }
+  function wirePushPrompt(d) {
+    const btn = document.getElementById("notifyBtn");
+    if (!btn) return;
+    btn.onclick = async () => {
+      localStorage.setItem(pushDismissedKey(), "1"); // ask once per browser either way
+      try { await enablePush(); toast(pick(COPY.push_enabled) || "Reminders on. 🔔"); }
+      catch (e) { toast("No worries — you can still do this the hard way. 😉"); }
+      btn.remove();
+    };
   }
 
   // ============ PARTNER — invitation → accept → watcher ============

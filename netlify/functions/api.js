@@ -53,6 +53,7 @@ function view(c, role) {
   // The reveal only ever fires for the doer, once, at day 19+, pre-unlock.
   if (role === "owner") base.secret_reveal = (m.streak >= 19 && !c.secret_unlocked && !c.secret_reveal_shown_at);
   if (role === "owner") base.prank_intro = (c.created_via === "prank" && !c.owner_intro_seen);
+  if (role === "owner") base.push_enabled = !!c.push_subscription;
   if (role === "owner") {
     base.invite_link = `/c/${c.id}?t=${c.partner_token}`;
     // "Your wife raised your Lazy Tax 🚨" banner: latest watcher change the owner hasn't seen.
@@ -155,7 +156,7 @@ export default async (req) => {
       const { blobs } = await store.list();
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
-      let activePairs = 0, visitsTotal = 0;
+      let activePairs = 0, visitsTotal = 0, pushEnabled = 0;
       const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {};
       for (const b of blobs) {
         if (b.key.startsWith("visits:")) {
@@ -171,6 +172,7 @@ export default async (req) => {
         if (!c || !c.id) continue;
         if (c.is_test) continue; // exclude tagged E2E/verification rows from all North Star totals
         signups++;
+        if (c.push_subscription) pushEnabled++;
         if (c.created_via === "prank") pranks++;
         if (c.partner_first_seen) partners++;
         shares += Number(c.share_count || 0);
@@ -206,7 +208,8 @@ export default async (req) => {
       return json({
         totals: {
           signups, pranks, partners_joined: partners, total_sessions: totalSessions, shares,
-          activated, active_last_7d: activeLast7,
+          activated, active_last_7d: activeLast7, push_enabled: pushEnabled,
+          push_enabled_rate: signups ? +(pushEnabled / signups * 100).toFixed(1) : 0,
           active_pairs: activePairs, sessions_by_via: sessionsByVia,
           sessions_by_hook_variant: sessionsByHook, shares_by_cta_variant: ctaTotals,
           retention_2d: signups ? +(retained2 / signups * 100).toFixed(1) : 0,
@@ -290,6 +293,29 @@ export default async (req) => {
       }
       await store.setJSON(id, c);
       return json(view(c, role));
+    }
+
+    // ---- push_subscribe (owner opts into a return-reminder push) -----
+    if (action === "push_subscribe") {
+      if (role !== "owner") return json({ error: "only the challenger can enable reminders" }, 403);
+      const b = await req.json().catch(() => ({}));
+      const sub = b.subscription;
+      if (!sub || typeof sub.endpoint !== "string" || !sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+        return json({ error: "bad subscription" }, 400);
+      }
+      c.push_subscription = { endpoint: clean(sub.endpoint, 500), keys: { p256dh: clean(sub.keys.p256dh, 200), auth: clean(sub.keys.auth, 100) } };
+      c.push_subscribed_at = Date.now();
+      await store.setJSON(id, c);
+      return json({ ok: true });
+    }
+
+    // ---- push_unsubscribe (owner turns reminders back off) -----------
+    if (action === "push_unsubscribe") {
+      if (role !== "owner") return json({ error: "owner only" }, 403);
+      delete c.push_subscription;
+      c.push_subscribed_at = null;
+      await store.setJSON(id, c);
+      return json({ ok: true });
     }
 
     // ---- penalty (partner/profiteer raises the stakes) ---------------

@@ -69,6 +69,20 @@ const ch = await call("cheer", { id, t: partnerT }, { emoji: "🔥" });
 ok(ch.data.cheers[ch.data.today].length === 1, "cheer recorded");
 eq((await call("share", { id, t: ownerT })).data.shares, 1, "share counted");
 
+console.log("push subscribe/unsubscribe");
+{
+  eq((await call("push_subscribe", { id, t: partnerT }, { subscription: { endpoint: "https://x", keys: { p256dh: "a", auth: "b" } } })).status, 403, "partner can't enable owner's reminders");
+  eq((await call("push_subscribe", { id, t: ownerT }, { subscription: {} })).status, 400, "bad subscription rejected");
+  const sub = await call("push_subscribe", { id, t: ownerT }, { subscription: { endpoint: "https://push.example/ep1", keys: { p256dh: "pkey", auth: "akey" } } });
+  eq(sub.data.ok, true, "subscribe ok");
+  eq((await call("get", { id, t: ownerT })).data.push_enabled, true, "push_enabled true after subscribe");
+  const unsub = await call("push_unsubscribe", { id, t: ownerT }, {});
+  eq(unsub.data.ok, true, "unsubscribe ok");
+  eq((await call("get", { id, t: ownerT })).data.push_enabled, false, "push_enabled false after unsubscribe");
+  // re-subscribe so the stats assertions below see 1 push-enabled signup
+  await call("push_subscribe", { id, t: ownerT }, { subscription: { endpoint: "https://push.example/ep1", keys: { p256dh: "pkey", auth: "akey" } } });
+}
+
 console.log("visit ping");
 eq((await call("visit", {}, { ref: "direct" })).data.ok, true, "visit ping ok");
 eq((await call("visit", {}, { ref: "reddit" })).data.ok, true, "visit ping ok (2nd, reddit ref)");
@@ -80,6 +94,8 @@ const st = await call("stats", { key: "testkey123" });
 eq(st.data.totals.signups, 1, "1 signup");
 eq(st.data.totals.total_sessions, 1, "1 session");
 ok(st.data.totals.partners_joined >= 1, "watcher activation counted");
+eq(st.data.totals.push_enabled, 1, "1 push-enabled signup");
+eq(st.data.totals.push_enabled_rate, 100, "push_enabled_rate 100% of 1 signup");
 eq(st.data.totals.visits_total, 3, "3 visits counted");
 ok(Array.isArray(st.data.visits_by_day) && st.data.visits_by_day.length === 30, "visits_by_day 30-day series");
 eq(st.data.visits_by_day[st.data.visits_by_day.length - 1].count, 3, "today's visits bucket has 3");
