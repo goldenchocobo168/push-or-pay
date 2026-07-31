@@ -351,7 +351,7 @@ export default async (req) => {
     if (action === "share") {
       const b = await req.json().catch(() => ({}));
       c.share_count = Number(c.share_count || 0) + 1;
-      const cta_pool = b.cta_pool === "owed" ? "owed" : "clean";
+      const cta_pool = ["owed", "tax_raised"].includes(b.cta_pool) ? b.cta_pool : "clean";
       let cta_variant = Math.round(Number(b.cta_variant));
       if (!Number.isFinite(cta_variant) || cta_variant < 0) cta_variant = 0;
       cta_variant = Math.min(9, cta_variant);

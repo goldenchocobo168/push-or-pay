@@ -68,6 +68,7 @@ console.log("cheer + share");
 const ch = await call("cheer", { id, t: partnerT }, { emoji: "🔥" });
 ok(ch.data.cheers[ch.data.today].length === 1, "cheer recorded");
 eq((await call("share", { id, t: ownerT })).data.shares, 1, "share counted");
+eq((await call("share", { id, t: ownerT }, { cta_pool: "tax_raised", cta_variant: 0 })).data.shares, 2, "tax_raised share counted");
 
 console.log("push subscribe/unsubscribe");
 {

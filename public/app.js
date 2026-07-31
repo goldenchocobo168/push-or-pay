@@ -79,7 +79,7 @@
   // ============ OWNER (the one keeping the streak) ============
   function renderOwnerDashboard(d) {
     const banner = d.lazy_tax_update
-      ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button></div>` : "";
+      ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button><button class="btn fire" id="shareTaxBtn" style="margin-top:8px">Screenshot this 📸</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
     // hero varies by mode: normal (x/30) · challenge complete · Secret/Hardcore (uncapped + tier)
     let heroTop, heroSub;
@@ -135,7 +135,7 @@
       copy(url, "Invite copied 📋 — send it over 😈");
     };
     const ack = document.getElementById("ackBtn"); if (ack) ack.onclick = async () => { try { render(await api("lazy_tax_ack", {})); } catch (e) { toast(e.message); } };
-    wireHeat(d); wireShare(d);
+    wireHeat(d); wireShare(d); wireShareTaxRaised(d);
   }
 
   function renderSession(d) {
@@ -291,6 +291,16 @@
         ? `😭 ${d.partner_name} earned ${d.week_earned_display} this week off my skipped push-ups. ${pick(COPY.share_owed)} Push or Pay.`
         : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. ${pick(COPY.share_clean)} Push or Pay.`;
       api("share", { cta_pool: owed ? "owed" : "clean", cta_variant: variant }).catch(() => {});
+      if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
+      else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
+    };
+  }
+  function wireShareTaxRaised(d) {
+    const sb = document.getElementById("shareTaxBtn"); if (!sb) return;
+    sb.onclick = async () => {
+      const variant = pickIdx(COPY.share_tax_raised);
+      const text = `😭 ${d.partner_name} just raised my Lazy Tax to ${d.lazy_tax_update.to}. ${pick(COPY.share_tax_raised)} Push or Pay.`;
+      api("share", { cta_pool: "tax_raised", cta_variant: variant }).catch(() => {});
       if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
       else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
     };
