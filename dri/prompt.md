@@ -69,6 +69,15 @@ funny copy lives in `public/copy.json` (static, no AI).
    create a new scratch challenge if the file is missing/its id 404s, and re-persist it immediately
    if you do. If anything is broken, fix it FIRST (before any new feature). A cron/exit-0 is not
    "working" — verify by real output freshness.
+   **The GET-only rule also covers ad-hoc live verification of a new feature, not just this routine
+   check.** The persisted scratch challenge is a normal row, not `is_test`-flagged (only rows created
+   with the `x-tibo-test-key` header are excluded from stats aggregation) — a `POST` to
+   `action=share`/`cheer`/`penalty`/`session` against it mutates real North Star-feeding counters
+   (cycle 261 briefly moved live `shares` 0→1 this way; caught via `netlify blobs:get` and corrected
+   via `netlify blobs:set` same-cycle). To live-verify a stat-mutating action, `POST action=create`
+   with the `x-tibo-test-key` header to get a genuinely `is_test` row instead, or rely on `npm test`
+   + code review only (same precedent as push-subscribe, which has no browser-automation tool to
+   click through with this session).
 6. **REPORT** — append a structured entry to `dri/journal/<UTC-date>.md` using the template below,
    and one atomic line to `~/.openclaw/shared/raw/<UTC-date>.md` prefixed `[Tibo/PushOrPay]`.
    Telegram to Sam ONLY on P0/P1 (site down, data loss risk) — never routine.
