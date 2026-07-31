@@ -21,7 +21,13 @@
     return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
   };
   const pushDismissedKey = () => `pp_push_dismissed_${id}`;
+  const iosHintDismissedKey = () => `pp_ios_hint_dismissed_${id}`;
   const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  // iOS Safari never exposes PushManager in a normal tab — only after the site is
+  // added to the Home Screen (standalone). Detect that gap so we can nudge instead
+  // of silently rendering nothing (see #79).
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent || "") && !window.MSStream;
+  const isStandalone = () => (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
   async function enablePush() {
     const reg = await navigator.serviceWorker.register("/sw.js");
     const perm = await Notification.requestPermission();
@@ -176,15 +182,21 @@
           <button class="btn block lg" id="okBtn" style="margin-top:16px">Back to my streak</button>
           ${hit ? `<button class="btn ghost block" id="shareBtn" style="margin-top:10px">Share this streak 📣</button>` : ""}
           ${showPushPrompt(d) ? `<button class="btn ghost block" id="notifyBtn" style="margin-top:10px">${esc(pick(COPY.push_prompt))}</button>` : ""}
+          ${showIOSHint(d) ? `<p class="hint" id="iosHint" style="margin-top:10px">${esc(pick(COPY.push_ios_hint))}</p>` : ""}
         </div>
       </div>`;
     document.getElementById("okBtn").onclick = () => renderOwnerDashboard(d);
     if (hit) { confetti(); wireShare(d); }
     wirePushPrompt(d);
+    const iosHint = document.getElementById("iosHint");
+    if (iosHint) iosHint.onclick = () => { localStorage.setItem(iosHintDismissedKey(), "1"); iosHint.remove(); };
   }
 
   function showPushPrompt(d) {
     return pushSupported() && !d.push_enabled && Notification.permission === "default" && !localStorage.getItem(pushDismissedKey());
+  }
+  function showIOSHint(d) {
+    return !pushSupported() && isIOS() && !isStandalone() && !d.push_enabled && !localStorage.getItem(iosHintDismissedKey());
   }
   function wirePushPrompt(d) {
     const btn = document.getElementById("notifyBtn");

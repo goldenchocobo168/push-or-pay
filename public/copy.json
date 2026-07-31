@@ -82,5 +82,10 @@
     "Your streak is one skip away from becoming their payday. 👀",
     "Quick nudge: no session logged yet today. The final boss is watching. 😈",
     "Still time to keep the green wall standing. 🟩"
+  ],
+  "push_ios_hint": [
+    "📲 iPhone: tap Share → Add to Home Screen for tomorrow's nudge",
+    "📲 On iPhone? Add to Home Screen so we can tap you on the shoulder tomorrow",
+    "📲 Safari won't let us nudge you here — Add to Home Screen fixes that"
   ]
 }
