@@ -5,9 +5,10 @@
   "description": "Turn your loved ones into your accountability partners. Miss a tiny daily habit, they earn the penalty.",
   "type": "module",
   "scripts": {
-    "test": "node test/logic.test.mjs && node test/api.test.mjs"
+    "test": "node test/logic.test.mjs && node test/api.test.mjs && node test/send-reminders.test.mjs"
   },
   "dependencies": {
-    "@netlify/blobs": "^8.1.0"
+    "@netlify/blobs": "^8.1.0",
+    "web-push": "^3.6.7"
   }
 }
