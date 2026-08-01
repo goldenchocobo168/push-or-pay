@@ -120,13 +120,6 @@
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="card"><h2>Your journey</h2>${heatmapHTML(d.heat)}</div>
-          <div class="card center lazy-card">
-            <div class="lz-label">Lazy Tax 💸</div>
-            <div class="lz-amt">${lazyLabel(d)}</div>
-            <div class="hint">${esc(d.partner_name)} collects it every day you skip.${d.accepted ? "" : ` (once they join)`}</div>
-          </div>
-          ${shareCardHTML(d)}
           <div class="card">
             <h2>${d.accepted ? `👀 ${esc(d.partner_name)} is watching` : `Invite ${esc(d.partner_name)}`}</h2>
             ${d.accepted
@@ -134,6 +127,13 @@
               : `<div class="lk"><input readonly id="inviteInput" value="${location.origin + d.invite_link}" /><button class="copy" id="copyInvite">Copy</button></div>
                  <p class="hint">Send it over — the fun starts the moment they open it. 😈</p>`}
           </div>
+          <div class="card"><h2>Your journey</h2>${heatmapHTML(d.heat)}</div>
+          <div class="card center lazy-card">
+            <div class="lz-label">Lazy Tax 💸</div>
+            <div class="lz-amt">${lazyLabel(d)}</div>
+            <div class="hint">${esc(d.partner_name)} collects it every day you skip.${d.accepted ? "" : ` (once they join)`}</div>
+          </div>
+          ${shareCardHTML(d)}
         </div>
       </div>`;
     const sb = document.getElementById("startBtn"); if (sb) sb.onclick = () => renderSession(d);
