@@ -115,6 +115,8 @@
               ? `<button class="btn block" disabled style="margin-top:12px">Done today ✅</button>`
               : `<button class="btn block lg" id="startBtn" style="margin-top:12px">Start</button>`}
             ${cheersRow(d)}
+            ${showPushPrompt(d) ? `<button class="btn ghost block" id="notifyBtn" style="margin-top:10px">${esc(pick(COPY.push_prompt))}</button>` : ""}
+            ${showIOSHint(d) ? `<p class="hint" id="iosHint" style="margin-top:10px">${esc(pick(COPY.push_ios_hint))}</p>` : ""}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:14px">
@@ -141,7 +143,7 @@
       copy(url, "Invite copied 📋 — send it over 😈");
     };
     const ack = document.getElementById("ackBtn"); if (ack) ack.onclick = async () => { try { render(await api("lazy_tax_ack", {})); } catch (e) { toast(e.message); } };
-    wireHeat(d); wireShare(d); wireShareTaxRaised(d);
+    wireHeat(d); wireShare(d); wireShareTaxRaised(d); wirePushPrompt(d); wireIosHint();
   }
 
   function renderSession(d) {
@@ -188,8 +190,7 @@
     document.getElementById("okBtn").onclick = () => renderOwnerDashboard(d);
     if (hit) { confetti(); wireShare(d); }
     wirePushPrompt(d);
-    const iosHint = document.getElementById("iosHint");
-    if (iosHint) iosHint.onclick = () => { localStorage.setItem(iosHintDismissedKey(), "1"); iosHint.remove(); };
+    wireIosHint();
   }
 
   function showPushPrompt(d) {
@@ -207,6 +208,10 @@
       catch (e) { toast("No worries — you can still do this the hard way. 😉"); }
       btn.remove();
     };
+  }
+  function wireIosHint() {
+    const el = document.getElementById("iosHint");
+    if (el) el.onclick = () => { localStorage.setItem(iosHintDismissedKey(), "1"); el.remove(); };
   }
 
   // ============ PARTNER — invitation → accept → watcher ============
