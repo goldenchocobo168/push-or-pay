@@ -11,6 +11,9 @@ const TEST_KEY = process.env.TIBO_TEST_KEY || "";
 // Privacy-preserving referrer buckets — never store the raw referrer URL,
 // only which known category it fell into (client already collapses to this set).
 const REF_CATEGORIES = new Set(["direct", "google", "reddit", "hn", "twitter", "github", "other"]);
+// Coarse client platform bucket — lets stats tell "no iOS traffic" apart from
+// "iOS traffic isn't converting" for the Home-Screen-gated push opt-in (#81).
+const PLATFORM_CATEGORIES = new Set(["ios_safari", "other"]);
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -140,11 +143,14 @@ export default async (req) => {
     if (action === "visit") {
       const b = await req.json().catch(() => ({}));
       const ref = REF_CATEGORIES.has(b.ref) ? b.ref : "other";
+      const platform = PLATFORM_CATEGORIES.has(b.platform) ? b.platform : "other";
       const vKey = `visits:${todaySGT()}`;
-      const cur = (await store.get(vKey, { type: "json" })) || { count: 0, by_ref: {} };
+      const cur = (await store.get(vKey, { type: "json" })) || { count: 0, by_ref: {}, by_platform: {} };
       cur.count = Number(cur.count || 0) + 1;
       cur.by_ref = cur.by_ref || {};
       cur.by_ref[ref] = Number(cur.by_ref[ref] || 0) + 1;
+      cur.by_platform = cur.by_platform || {};
+      cur.by_platform[platform] = Number(cur.by_platform[platform] || 0) + 1;
       await store.setJSON(vKey, cur);
       return json({ ok: true });
     }
@@ -157,7 +163,7 @@ export default async (req) => {
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
       let activePairs = 0, visitsTotal = 0, pushEnabled = 0;
-      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {};
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
       for (const b of blobs) {
         if (b.key.startsWith("visits:")) {
           const v = await store.get(b.key, { type: "json" });
@@ -166,6 +172,7 @@ export default async (req) => {
           visitsByDay[day] = count;
           visitsTotal += count;
           if (v && v.by_ref) for (const [k, n] of Object.entries(v.by_ref)) visitsByRef[k] = (visitsByRef[k] || 0) + Number(n || 0);
+          if (v && v.by_platform) for (const [k, n] of Object.entries(v.by_platform)) visitsByPlatform[k] = (visitsByPlatform[k] || 0) + Number(n || 0);
           continue;
         }
         const c = await store.get(b.key, { type: "json" });
@@ -218,6 +225,7 @@ export default async (req) => {
           partner_join_rate: signups ? +(partners / signups * 100).toFixed(1) : 0,
           visits_total: visitsTotal,
           visits_by_ref: visitsByRef,
+          visits_by_platform: visitsByPlatform,
         },
         signups_by_day: series, visits_by_day: visitsSeries, recent: recent.slice(0, 60),
       });

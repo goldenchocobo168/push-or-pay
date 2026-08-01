@@ -86,8 +86,8 @@ console.log("push subscribe/unsubscribe");
 
 console.log("visit ping");
 eq((await call("visit", {}, { ref: "direct" })).data.ok, true, "visit ping ok");
-eq((await call("visit", {}, { ref: "reddit" })).data.ok, true, "visit ping ok (2nd, reddit ref)");
-eq((await call("visit", {}, { ref: "totally-not-a-category" })).data.ok, true, "visit ping ok (3rd, unknown ref folds to other)");
+eq((await call("visit", {}, { ref: "reddit", platform: "ios_safari" })).data.ok, true, "visit ping ok (2nd, reddit ref, ios_safari platform)");
+eq((await call("visit", {}, { ref: "totally-not-a-category", platform: "totally-not-a-platform" })).data.ok, true, "visit ping ok (3rd, unknown ref/platform folds to other)");
 
 console.log("stats");
 eq((await call("stats", {})).status, 401, "stats needs key");
@@ -103,6 +103,8 @@ eq(st.data.visits_by_day[st.data.visits_by_day.length - 1].count, 3, "today's vi
 eq(st.data.totals.visits_by_ref.direct, 1, "1 direct visit (no ref sent)");
 eq(st.data.totals.visits_by_ref.reddit, 1, "1 reddit visit");
 eq(st.data.totals.visits_by_ref.other, 1, "unknown ref category folds to other");
+eq(st.data.totals.visits_by_platform.other, 2, "2 visits fold to other platform (no platform sent + unknown platform)");
+eq(st.data.totals.visits_by_platform.ios_safari, 1, "1 ios_safari visit");
 
 console.log("Secret Mode — 30-day cap, Day-19 reveal, unlock, hardcore");
 {
