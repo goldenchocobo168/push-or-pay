@@ -152,6 +152,21 @@ console.log("reverse-invite (prank mode) still supported");
   const p = await call("create", {}, { owner_name: "Victim", partner_name: "Prankster", daily_target: 10, penalty_amount: 10000, currency: "Rp", created_via: "prank" });
   eq(p.data.created_via, "prank", "prank mode create");
   ok(p.data.owner_link && p.data.invite_link, "both links returned (creator sends owner_link to the doer)");
+  const pid = p.data.id, pOwnerT = tokenOf(p.data.owner_link), pPartnerT = tokenOf(p.data.invite_link);
+
+  console.log("prank creator is auto-accepted (holds partner_token, already 'accepted' by creating it)");
+  const ppg = await call("get", { id: pid, t: pPartnerT });
+  eq(ppg.data.role, "partner", "creator's link is role partner");
+  eq(ppg.data.accepted, true, "prank creator skips the invitee 'accept' screen — they already made it");
+
+  console.log("prank doer sees the prankster as already watching, not an 'invite' card");
+  const pog = await call("get", { id: pid, t: pOwnerT });
+  eq(pog.data.role, "owner", "doer's link is role owner");
+  eq(pog.data.accepted, true, "doer sees partner as already watching, no pointless self-invite");
+
+  console.log("self mode is unaffected: real partner still starts unaccepted");
+  const sg = await call("get", { id, t: partnerT });
+  eq(sg.data.accepted, true, "self-mode partner already accepted earlier in this suite, unaffected by prank change");
 }
 
 console.log("guards");

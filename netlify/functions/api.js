@@ -129,7 +129,11 @@ export default async (req) => {
         secret_reveal_shown_at: null,
         share_count: 0,
         owner_seen: false,
-        partner_first_seen: null,
+        // prank: creator keeps the partner_token (they're the profiteer) — they
+        // already "accepted" by creating it, so don't force them through the
+        // real invitee's "You've been invited / Accept challenge" screen.
+        partner_accepted: created_via === "prank" ? Date.now() : null,
+        partner_first_seen: created_via === "prank" ? Date.now() : null,
         created_at: Date.now(),
       };
       await store.setJSON(c.id, c);
@@ -199,7 +203,10 @@ export default async (req) => {
         const via = c.created_via || "self";
         (byVia[via] ||= []).push(days.length);
         if (c.hook_variant !== undefined && c.hook_variant !== null) (byHook[c.hook_variant] ||= []).push(days.length);
-        if (c.invite_variant !== undefined && c.invite_variant !== null) (byInvite[c.invite_variant] ||= []).push(partnerJoined ? 1 : 0);
+        // invite_hint copy is only ever shown to a self-mode owner still waiting on
+        // their real partner — prank creators are auto-accepted (see create handler)
+        // and never see it, so excluding them keeps this calibration signal clean.
+        if (via === "self" && c.invite_variant !== undefined && c.invite_variant !== null) (byInvite[c.invite_variant] ||= []).push(partnerJoined ? 1 : 0);
         if (c.shares_by_cta) for (const [k, v] of Object.entries(c.shares_by_cta)) ctaTotals[k] = (ctaTotals[k] || 0) + v;
         const day = c.start_date || (c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "?");
         byDay[day] = (byDay[day] || 0) + 1;
