@@ -40,6 +40,9 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const pickIdx = (arr) => (arr && arr.length ? Math.abs(seed) % arr.length : 0);
   const pick = (arr) => (arr && arr.length ? arr[pickIdx(arr)] : "");
+  // Invite-card hint: fixed per challenge (server-persisted invite_variant), not
+  // re-randomized per render, so partner_join_by_invite_variant measures a stable copy.
+  const inviteHint = (d) => { const arr = COPY.invite_hint; return arr && arr.length ? arr[(d.invite_variant || 0) % arr.length] : "Send it over — the fun starts the moment they open it. 😈"; };
   const money2 = (a, cur) => { cur = cur || "$"; const n = cur === "Rp" ? Number(a).toLocaleString("en-US") : a; return `${cur}${cur === "Rp" ? " " : ""}${n}`; };
   const fmtDur = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
   const niceDate = (iso) => { const [y, m, dd] = iso.split("-"); return new Date(Date.UTC(+y, +m - 1, +dd)).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
@@ -125,7 +128,7 @@
             ${d.accepted
               ? `<p class="hint">They're in the game — cheering, teasing, and one tap away from raising your Lazy Tax. 😈</p>`
               : `<div class="lk"><input readonly id="inviteInput" value="${location.origin + d.invite_link}" /><button class="copy" id="copyInvite">Copy</button></div>
-                 <p class="hint">Send it over — the fun starts the moment they open it. 😈</p>`}
+                 <p class="hint">${esc(inviteHint(d))}</p>`}
           </div>
           <div class="card"><h2>Your journey</h2>${heatmapHTML(d.heat)}</div>
           <div class="card center lazy-card">

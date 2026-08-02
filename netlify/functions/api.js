@@ -59,6 +59,7 @@ function view(c, role) {
   if (role === "owner") base.push_enabled = !!c.push_subscription;
   if (role === "owner") {
     base.invite_link = `/c/${c.id}?t=${c.partner_token}`;
+    base.invite_variant = c.invite_variant || 0;
     // "Your wife raised your Lazy Tax 🚨" banner: latest watcher change the owner hasn't seen.
     const evs = c.penalty_events || [];
     const lastWatcher = [...evs].reverse().find((e) => e.changed_by === "partner");
@@ -104,6 +105,9 @@ export default async (req) => {
       let hook_variant = Math.round(Number(b.hook_variant));
       if (!Number.isFinite(hook_variant) || hook_variant < 0) hook_variant = 0;
       hook_variant = Math.min(9, hook_variant);
+      let invite_variant = Math.round(Number(b.invite_variant));
+      if (!Number.isFinite(invite_variant) || invite_variant < 0) invite_variant = 0;
+      invite_variant = Math.min(9, invite_variant);
 
       const c = {
         id: newId(),
@@ -114,6 +118,7 @@ export default async (req) => {
         created_via,
         is_test,
         hook_variant,
+        invite_variant,
         owner_token: randomUUID(),
         partner_token: randomUUID(),
         start_date: todaySGT(),
@@ -163,7 +168,7 @@ export default async (req) => {
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
       let activePairs = 0, visitsTotal = 0, pushEnabled = 0;
-      const byDay = {}, recent = [], byVia = {}, byHook = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, byInvite = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
       for (const b of blobs) {
         if (b.key.startsWith("visits:")) {
           const v = await store.get(b.key, { type: "json" });
@@ -194,6 +199,7 @@ export default async (req) => {
         const via = c.created_via || "self";
         (byVia[via] ||= []).push(days.length);
         if (c.hook_variant !== undefined && c.hook_variant !== null) (byHook[c.hook_variant] ||= []).push(days.length);
+        if (c.invite_variant !== undefined && c.invite_variant !== null) (byInvite[c.invite_variant] ||= []).push(partnerJoined ? 1 : 0);
         if (c.shares_by_cta) for (const [k, v] of Object.entries(c.shares_by_cta)) ctaTotals[k] = (ctaTotals[k] || 0) + v;
         const day = c.start_date || (c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "?");
         byDay[day] = (byDay[day] || 0) + 1;
@@ -208,6 +214,8 @@ export default async (req) => {
       for (const [k, v] of Object.entries(byVia)) sessionsByVia[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
       const sessionsByHook = {};
       for (const [k, v] of Object.entries(byHook)) sessionsByHook[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : 0;
+      const partnerJoinByInvite = {};
+      for (const [k, v] of Object.entries(byInvite)) partnerJoinByInvite[k] = v.length ? +(v.reduce((a, b) => a + b, 0) / v.length * 100).toFixed(1) : 0;
       const series = [];
       for (let i = 29; i >= 0; i--) { const d = new Date(Date.parse(today) - i * 86400000).toISOString().slice(0, 10); series.push({ date: d, count: byDay[d] || 0 }); }
       const visitsSeries = [];
@@ -218,7 +226,7 @@ export default async (req) => {
           activated, active_last_7d: activeLast7, push_enabled: pushEnabled,
           push_enabled_rate: signups ? +(pushEnabled / signups * 100).toFixed(1) : 0,
           active_pairs: activePairs, sessions_by_via: sessionsByVia,
-          sessions_by_hook_variant: sessionsByHook, shares_by_cta_variant: ctaTotals,
+          sessions_by_hook_variant: sessionsByHook, partner_join_by_invite_variant: partnerJoinByInvite, shares_by_cta_variant: ctaTotals,
           retention_2d: signups ? +(retained2 / signups * 100).toFixed(1) : 0,
           retention_7d: signups ? +(retained7 / signups * 100).toFixed(1) : 0,
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,

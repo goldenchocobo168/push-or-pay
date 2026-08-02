@@ -35,6 +35,7 @@ eq(og.data.role, "owner", "role owner");
 eq(og.data.penalty_display, "Rp 10,000", "Lazy Tax shows Rp 10,000");
 eq(og.data.penalty_usd_hint, "US$0.64", "…≈ US$0.64 hint");
 eq(og.data.accepted, false, "watcher not yet accepted");
+eq(og.data.invite_variant, 0, "invite_variant defaults to 0 when not sent at create");
 ok(!("prank_alert" in og.data), "no prank alert in v3");
 ok(!("owner_token" in og.data) && !("partner_token" in og.data), "raw tokens hidden");
 
@@ -89,14 +90,23 @@ eq((await call("visit", {}, { ref: "direct" })).data.ok, true, "visit ping ok");
 eq((await call("visit", {}, { ref: "reddit", platform: "ios_safari" })).data.ok, true, "visit ping ok (2nd, reddit ref, ios_safari platform)");
 eq((await call("visit", {}, { ref: "totally-not-a-category", platform: "totally-not-a-platform" })).data.ok, true, "visit ping ok (3rd, unknown ref/platform folds to other)");
 
+console.log("invite_variant — copy-variant lever on the invite card, tracked against partner-join outcome");
+const cv = await call("create", {}, { owner_name: "Variant", partner_name: "P", daily_target: 10, penalty_amount: 10, currency: "$", created_via: "self", invite_variant: 1 });
+const cvOwnerT = tokenOf(cv.data.owner_link);
+eq((await call("get", { id: cv.data.id, t: cvOwnerT })).data.invite_variant, 1, "invite_variant round-trips as sent");
+const cvNeg = await call("create", {}, { owner_name: "Neg", partner_name: "P", daily_target: 10, penalty_amount: 10, currency: "$", created_via: "self", invite_variant: -5 });
+eq((await call("get", { id: cvNeg.data.id, t: tokenOf(cvNeg.data.owner_link) })).data.invite_variant, 0, "out-of-range invite_variant clamps to 0, no crash");
+
 console.log("stats");
 eq((await call("stats", {})).status, 401, "stats needs key");
 const st = await call("stats", { key: "testkey123" });
-eq(st.data.totals.signups, 1, "1 signup");
+eq(st.data.totals.signups, 3, "3 signups (original + the 2 invite_variant challenges)");
+eq(st.data.totals.partner_join_by_invite_variant["0"], 50, "invite_variant 0 bucket: original (joined) + negative-clamped (not joined) averages to 50%");
+eq(st.data.totals.partner_join_by_invite_variant["1"], 0, "invite_variant 1 (partner never opened the link) shows 0%");
 eq(st.data.totals.total_sessions, 1, "1 session");
 ok(st.data.totals.partners_joined >= 1, "watcher activation counted");
 eq(st.data.totals.push_enabled, 1, "1 push-enabled signup");
-eq(st.data.totals.push_enabled_rate, 100, "push_enabled_rate 100% of 1 signup");
+eq(st.data.totals.push_enabled_rate, +(1 / 3 * 100).toFixed(1), "push_enabled_rate is 1 of 3 signups now that invite_variant added 2 more");
 eq(st.data.totals.visits_total, 3, "3 visits counted");
 ok(Array.isArray(st.data.visits_by_day) && st.data.visits_by_day.length === 30, "visits_by_day 30-day series");
 eq(st.data.visits_by_day[st.data.visits_by_day.length - 1].count, 3, "today's visits bucket has 3");

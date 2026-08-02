@@ -83,6 +83,11 @@
     "Quick nudge: no session logged yet today. The final boss is watching. 😈",
     "Still time to keep the green wall standing. 🟩"
   ],
+  "invite_hint": [
+    "Send it over — the fun starts the moment they open it. 😈",
+    "Nobody's watching yet, which means nobody cares if you skip. Fix that. 😈",
+    "30 seconds to send. The moment they open it, there's no backing out. 😈"
+  ],
   "push_ios_hint": [
     "📲 iPhone: tap Share → Add to Home Screen for tomorrow's nudge",
     "📲 On iPhone? Add to Home Screen so we can tap you on the shoulder tomorrow",

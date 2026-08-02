@@ -214,7 +214,7 @@
       fetch("/api?action=visit", { method: "POST", keepalive: true, headers: {"content-type":"application/json"}, body: JSON.stringify({ ref, platform }) });
     } catch(_){}
 
-    let COPY = {}, heroHookIdx = 0;
+    let COPY = {}, heroHookIdx = 0, inviteVariantIdx = 0;
     const rnd = (a) => a && a.length ? a[Math.floor(Math.random()*a.length)] : "";
     fetch("/copy.json").then(r=>r.json()).then(c=>{
       COPY=c;
@@ -224,6 +224,7 @@
         const hk = c.hook[heroHookIdx], heroEl=document.getElementById("heroHook");
         if(hk && heroHookIdx!==0 && heroEl) heroEl.textContent=hk;
       }
+      if (c.invite_hint && c.invite_hint.length) inviteVariantIdx = Math.floor(Math.random()*c.invite_hint.length);
     }).catch(()=>{});
 
     const toast = (t) => { const e=document.getElementById("toast"); e.textContent=t; e.classList.add("show"); setTimeout(()=>e.classList.remove("show"),2200); };
@@ -260,7 +261,7 @@
         // API owner = the DOER, partner = the collector. In prank mode they swap.
         const owner_name = mode==="prank" ? nameB : nameA;
         const partner_name = mode==="prank" ? nameA : nameB;
-        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode,hook_variant:heroHookIdx})});
+        const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode,hook_variant:heroHookIdx,invite_variant:inviteVariantIdx})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
         if(mode==="prank"){
           // creator is the collector; send the DOER (partner) their link
