@@ -11,3 +11,4 @@ dri/journal/*.jsonl
 dri/journal/*.md
 .pop-diag/
 dri/.scratch-challenge-id
+.env*
