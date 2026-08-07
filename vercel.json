@@ -1,0 +1,9 @@
+{
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/c/:id*", "destination": "/challenge.html" }
+  ],
+  "crons": [
+    { "path": "/api/send-reminders", "schedule": "0 12 * * *" }
+  ]
+}
