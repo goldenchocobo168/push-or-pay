@@ -1,8 +1,8 @@
 {
   "hook": [
     "Who profits when you skip?",
-    "A funny game you play with your wife.",
-    "Skip your push-ups. Fund her bubble tea.",
+    "A funny game you play with your partner.",
+    "Skip your push-ups. Fund their bubble tea.",
     "Skip today. Meet the final boss tomorrow."
   ],
   "warning": [
@@ -18,7 +18,7 @@
   "invite_sent": [
     "There is no turning back now. 😈",
     "Your final boss has entered the game.",
-    "Your wife has entered the game."
+    "Your partner has entered the game."
   ],
   "dashboard": [
     "Your streak is alive. Keep it that way.",
@@ -42,18 +42,18 @@
     "It happens. The streak resets — the fun doesn't."
   ],
   "lazy_tax_raised": [
-    "She believes in you. Probably.",
+    "They believe in you. Probably.",
     "Bold move by your final boss.",
     "The stakes just got real. 😈"
   ],
   "share_tax_raised": [
     "Send help. Or push-ups.",
-    "She's not playing around.",
+    "They're not playing around.",
     "This is what betrayal looks like."
   ],
   "share_owed": [
     "Time to get stronger.",
-    "My wife discovered passive income. Unfortunately, it's my laziness.",
+    "My partner discovered passive income. Unfortunately, it's my laziness.",
     "Send help. Or push-ups."
   ],
   "share_clean": [
