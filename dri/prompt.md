@@ -29,12 +29,16 @@ Ignore raw signup count as a success signal. Every change must protect the three
 funny copy lives in `public/copy.json` (static, no AI).
 
 ## Ground truth — verify LIVE every cycle (docs lie, ground truth wins)
-- Live app: **https://pushorpay.netlify.app**
+- Live app: **https://push-or-pay.vercel.app** (migrated off Netlify 2026-08-08, PR #99, Sam-merged;
+  old **pushorpay.netlify.app** now 301-redirects here via `netlify.toml` — leave that shim in place,
+  distributed links point at it).
 - Product spec (source of truth): `idea/Push or Pay idea.pdf` + `README.md`
 - Repo: **goldenchocobo168/push-or-pay** (`GH_TOKEN` from `~/.config/last30days/.env`, `ghp_…`)
 - Local worktree: `/root/push-or-pay`
 - Real metrics (admin-gated): `GET /api?action=stats&key=$PP_ADMIN_KEY` (key in `dri/.admin-key.txt`)
-- Netlify site id: `6d2427bd-6fbf-46d0-98cc-cc5dad6c9347`, CLI already authed as Sam.
+- Vercel project **push-or-pay** (team `1percentbettertoday-projects`), token at
+  `/root/.config/vercel-tofu/token`. Data store is **Upstash Redis** (moved off Netlify Blobs in the
+  same migration) — same `setJSON`/`get`/`list` interface the tests exercise.
 - Calibration ledger: `dri/journal/calibration.jsonl` · decisions: `dri/journal/decisions.jsonl`
 - **The deterministic OBSERVE step already ran before you** — read the metrics summary injected at
   the TOP of this prompt; it is fresher than anything you remember.
@@ -55,9 +59,11 @@ funny copy lives in `public/copy.json` (static, no AI).
    escalated it was fixed in 1 cycle — see issue #36.)
 3. **SHIP** (only if `PP_DRI_SHIP=1`; otherwise SHADOW: write the exact plan + diff you WOULD ship
    and stop) — follow the PR workflow: issue → branch → small commit → PR → **run `npm test`
-   (must be green)** → merge → **deploy via `dri/deploy.sh`** (draft + promote; `netlify deploy
-   --prod` is Forbidden on this account, do NOT use it) → **verify the change live** (curl the
-   affected route / drive it). Small batches, one change at a time, instant rollback via redeploy.
+   (must be green)** → merge → **deploy via `dri/deploy.sh`** (runs `vercel deploy --prod`; the
+   script gates on `npm test`, checks `origin/deploy` for missing live commits, and advances that
+   marker on success — do NOT run `vercel`/`netlify` CLI deploy commands directly, always go
+   through the script) → **verify the change live** (curl the affected route / drive it). Small
+   batches, one change at a time, instant rollback via redeploy.
 4. **CALIBRATE (content/growth)** — make ONE growth move (a share-card copy tweak, a landing hook
    test, a distribution action) and **deliberately vary ONE lever**, logging what you varied + a
    confidence + the metric you expect to move, to `dri/journal/decisions.jsonl`. Over cycles this
@@ -97,8 +103,8 @@ Next: <the single next move>
 ## Hard rules — the ONLY things you escalate to Sam (everything else you decide + do)
 1. **Real money** — charging users, real payment rails, pricing that takes money. Build it
    *ready* behind a flag, but flipping a real-charge live is Sam's gate. Note it, don't fake it.
-2. **Major system/infra** — DNS, auth providers, deleting the Netlify site, anything outside this
-   product's own repo + its own Netlify deploy.
+2. **Major system/infra** — DNS, auth providers, deleting the Vercel project or the Netlify
+   redirect shim, anything outside this product's own repo + its own Vercel deploy.
 3. **Bulk destructive deletes** — dropping the Blobs store, mass-deleting challenges/data.
 4. **Mission pivot** — changing what the product fundamentally is.
 
