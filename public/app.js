@@ -127,7 +127,7 @@
             <h2>${d.accepted ? `👀 ${esc(d.partner_name)} is watching` : `Invite ${esc(d.partner_name)}`}</h2>
             ${d.accepted
               ? `<p class="hint">They're in the game — cheering, teasing, and one tap away from raising your Lazy Tax. 😈</p>`
-              : `<div class="lk"><input readonly id="inviteInput" value="${location.origin + d.invite_link}" /><button class="copy" id="copyInvite">Copy</button></div>
+              : `<div class="lk"><input readonly id="inviteInput" value="${location.origin + d.invite_link}" /><button class="copy" id="copyInvite">Copy</button><a class="copy" id="waInvite" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${d.partner_name}, you're my final boss on Push or Pay 😈 ${location.origin + d.invite_link}`)}">WhatsApp</a></div>
                  <p class="hint">${esc(inviteHint(d))}</p>`}
           </div>
           <div class="card"><h2>Your journey</h2>${heatmapHTML(d.heat)}</div>
