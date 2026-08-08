@@ -221,7 +221,7 @@ input:focus, select:focus { border-color: var(--accent); }
 
 .reacts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; } .reacts button { font-size: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 12px; padding: 8px 13px; cursor: pointer; transition: transform .12s var(--ease); } .reacts button:active { transform: scale(.9); }
 .pill { display: inline-block; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 14px; color: var(--muted); margin: 2px; }
-.lk { display: flex; gap: 8px; margin-top: 10px; } .lk input { font-size: 13px; } .copy { flex: 0 0 auto; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 600; }
+.lk { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; } .lk input { font-size: 13px; min-width: 0; flex: 1 1 auto; } .copy { flex: 0 0 auto; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; }
 .raise { }
 
 /* segmented control (who does the push-ups) */
