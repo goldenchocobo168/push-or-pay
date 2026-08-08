@@ -17,7 +17,8 @@ Built from the product spec in [`idea/Push or Pay idea.pdf`](idea/), Elon-5P app
 transfer is explicitly **not** built — validate the funny behavior first).
 
 ## Live
-- App: **https://pushorpay.netlify.app**
+- App: **https://push-or-pay.vercel.app** (migrated off Netlify 2026-08-08, PR #99; old
+  `pushorpay.netlify.app` now 301-redirects here, kept alive for distributed links)
 - Analytics (admin-gated): **/admin** — signups, pranks, push-up sessions, retention, shares.
 - Repo: **github.com/goldenchocobo168/push-or-pay**
 
@@ -38,31 +39,36 @@ transfer is explicitly **not** built — validate the funny behavior first).
 - **Shareable card** ("😭 my wife earned $60 this week").
 
 ## Architecture
-Static frontend + **one Netlify Function (v2)** + **Netlify Blobs** (shared state). No external DB,
-no build step, **no cron** (streak/earnings computed lazily in SGT). One Blobs entry per challenge:
-`owner`(doer)/`partner`(profiteer) magic-link tokens, `daily_target`, `penalty_amount`, `currency`,
-`sessions{date:{reps,duration,…}}`, `penalty_events`, `cheers`, `created_via`.
+Static frontend + **Vercel Functions** (`api/`) + **Upstash Redis** (shared state, moved off
+Netlify Blobs in the same migration). No external DB, no build step, **no cron** for app logic
+(streak/earnings computed lazily in SGT; a Vercel cron does daily push reminders). One Redis entry
+per challenge: `owner`(doer)/`partner`(profiteer) magic-link tokens, `daily_target`,
+`penalty_amount`, `currency`, `sessions{date:{reps,duration,…}}`, `penalty_events`, `cheers`,
+`created_via`.
 
 ```
 public/            static frontend (no build): index (onboarding), challenge (app), admin, copy.json
 lib/penalty.mjs    pure streak/earnings/heatmap + money/IDR logic (unit-tested)
-netlify/functions/api.js   ?action=create|get|session|penalty|cheer|share|stats
+lib/store.mjs      Upstash Redis client wrapper (get/setJSON/list)
+api/index.js       ?action=create|get|session|penalty|cheer|share|stats
+api/send-reminders.js   daily push-reminder cron handler
 dri/               autonomous Tibo DRI (owns the product) — see below
 design/            top-1% UI/UX inspiration gallery
-test/              30 logic + 39 handler assertions + real-browser CDP E2E
+test/              logic + handler + send-reminders assertions + real-browser CDP E2E
 ```
 
 ## Run tests
 ```
-npm install && npm test          # 69 assertions
+npm install && npm test          # logic + handler + send-reminders assertions
 python3 test/browser_e2e.py      # real-browser end-to-end (needs Chrome on :9222)
 ```
 
 ## Deploy
-`netlify --prod` is **Forbidden** on this account — use the draft+promote wrapper:
+`vercel deploy --prod` directly is discouraged — use the gated wrapper (tests, live-tree check,
+verify):
 ```
-dri/deploy.sh                    # npm test -> draft deploy -> promote -> verify live
-netlify env:set PP_ADMIN_KEY <key>   # for /admin
+dri/deploy.sh                    # npm test -> vercel deploy --prod -> verify live
+vercel env add PP_ADMIN_KEY      # for /admin
 ```
 
 ## Ownership — the Tibo DRI
