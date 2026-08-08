@@ -1,4 +1,4 @@
-// Unit tests for the daily push-reminder send loop (netlify/functions/send-reminders.js).
+// Unit tests for the daily push-reminder send loop (api/send-reminders.js).
 // Runs the core loop against an in-memory store + a fake `send`, so no real
 // web-push network calls happen. Run: node test/send-reminders.test.mjs
 import assert from "node:assert";
@@ -12,7 +12,7 @@ function memStore(seed = {}) {
   };
 }
 
-const { runSendReminders } = await import("../netlify/functions/send-reminders.js");
+const { runSendReminders } = await import("../api/send-reminders.js");
 const { todaySGT } = await import("../lib/penalty.mjs");
 
 let pass = 0;

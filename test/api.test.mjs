@@ -10,7 +10,8 @@ function memStore() {
 const STORE = memStore();
 globalThis.__PP_STORE__ = STORE;
 process.env.PP_ADMIN_KEY = "testkey123";
-const { default: handler } = await import("../netlify/functions/api.js");
+const { default: mod } = await import("../api/index.js");
+const handler = mod.fetch;
 const { addDays, todaySGT } = await import("../lib/penalty.mjs");
 
 let pass = 0;

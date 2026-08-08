@@ -1,9 +1,9 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "../lib/store.mjs";
 import { randomUUID } from "node:crypto";
-import { compute, todaySGT, usdHint, money } from "../../lib/penalty.mjs";
+import { compute, todaySGT, usdHint, money } from "../lib/penalty.mjs";
 
 // Single API function for Push or Pay. Route via ?action=... .
-export const config = { path: "/api" };
+// Vercel maps this file (api/index.js) to /api; see vercel.json.
 
 const MAX_NAME = 40;
 const ADMIN_KEY = process.env.PP_ADMIN_KEY || "";
@@ -82,7 +82,7 @@ function hardcoreTier(streak) {
   return { name: "Iron", emoji: "🔥", next: 100 };
 }
 
-export default async (req) => {
+async function handler(req) {
   const url = new URL(req.url);
   const action = url.searchParams.get("action") || "";
   const store = globalThis.__PP_STORE__ || getStore("challenges");
@@ -391,4 +391,6 @@ export default async (req) => {
   } catch (e) {
     return json({ error: "server error", detail: String((e && e.message) || e) }, 500);
   }
-};
+}
+
+export default { fetch: handler };

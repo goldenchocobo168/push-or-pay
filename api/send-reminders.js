@@ -1,16 +1,15 @@
-import { getStore } from "@netlify/blobs";
+import { getStore } from "../lib/store.mjs";
 import webpush from "web-push";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { isDone, todaySGT, pick } from "../../lib/penalty.mjs";
+import { isDone, todaySGT, pick } from "../lib/penalty.mjs";
 
-// Fires once daily, before the SGT day boundary that resets todaySGT() —
-// 20:00 SGT = 12:00 UTC.
-export const config = { schedule: "0 12 * * *" };
+// Vercel Cron hits this daily, before the SGT day boundary that resets
+// todaySGT() — 20:00 SGT = 12:00 UTC. Schedule lives in vercel.json.
 
 const COPY = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/copy.json"), "utf8")
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/copy.json"), "utf8")
 );
 
 // Public VAPID key — not secret, must match public/app.js's VAPID_PUBLIC_KEY.
@@ -53,7 +52,17 @@ export async function runSendReminders(store, send) {
   return { sent, skipped, cleaned, failed };
 }
 
-export default async () => {
+async function handler(req) {
+  // Vercel Cron requests carry a bearer secret in production; reject anything
+  // else so this endpoint can't be used to spam every subscriber on demand.
+  const cronSecret = process.env.CRON_SECRET || "";
+  if (cronSecret) {
+    const auth = req.headers.get("authorization") || "";
+    if (auth !== `Bearer ${cronSecret}`) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+    }
+  }
+
   const privateKey = process.env.VAPID_PRIVATE_KEY || "";
   const subject = process.env.VAPID_SUBJECT || "";
   if (!privateKey || !subject) {
@@ -63,4 +72,6 @@ export default async () => {
   const store = globalThis.__PP_STORE__ || getStore("challenges");
   const result = await runSendReminders(store, (subscription, payload) => webpush.sendNotification(subscription, payload));
   return new Response(JSON.stringify(result), { status: 200, headers: { "content-type": "application/json" } });
-};
+}
+
+export default { fetch: handler };

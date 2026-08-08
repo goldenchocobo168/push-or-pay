@@ -8,7 +8,7 @@
     "test": "node test/logic.test.mjs && node test/api.test.mjs && node test/send-reminders.test.mjs"
   },
   "dependencies": {
-    "@netlify/blobs": "^8.1.0",
+    "@upstash/redis": "^1.34.3",
     "web-push": "^3.6.7"
   }
 }
