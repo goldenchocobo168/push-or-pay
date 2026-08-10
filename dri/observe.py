@@ -14,7 +14,7 @@ to their spouse?" — i.e. SHARES. We track two:
 """
 import json, os, sys, time, urllib.parse, urllib.request, pathlib
 
-BASE = os.environ.get("PP_BASE", "https://pushorpay.netlify.app")
+BASE = os.environ.get("PP_BASE", "https://push-or-pay.vercel.app")
 HERE = pathlib.Path(__file__).resolve().parent
 KEYFILE = HERE / ".admin-key.txt"
 CALIB = HERE / "journal" / "calibration.jsonl"
