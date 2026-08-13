@@ -177,7 +177,7 @@
           <div class="emoji-xl">😈</div>
           <h1 class="title">Challenge created</h1>
           <p class="lead" id="doneLead">Now your final boss gets to watch. Send them the invite:</p>
-          <div class="lk"><input readonly id="sendLink" /><button class="copy" id="copySend">Copy</button></div>
+          <div class="lk"><input readonly id="sendLink" /><button class="copy" id="copySend">Copy</button><a class="copy" id="waSend" target="_blank" rel="noopener" href="#">WhatsApp</a></div>
           <button class="btn block lg" id="openBtn" style="margin-top:16px">Open my dashboard</button>
           <p class="hint center">Bookmark <b>your page</b> after it opens — it's your streak HQ.</p>
         </div>
@@ -264,6 +264,7 @@
         const partner_name = mode==="prank" ? nameA : nameB;
         const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode,hook_variant:heroHookIdx,invite_variant:inviteVariantIdx})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
+        let sendText;
         if(mode==="prank"){
           // creator is the collector; send the DOER (partner) their link
           document.getElementById("sendLink").value=location.origin+d.owner_link;
@@ -271,12 +272,15 @@
           document.getElementById("doneLead").innerHTML=`Send this to <b>${nameB||"them"}</b>. Picture their face when they open it… 😏`;
           document.getElementById("openBtn").textContent="Open my (watcher) dashboard";
           document.getElementById("openBtn").onclick=()=>location.href=d.invite_link;
+          sendText = `${nameA||"Someone"} just challenged you to Push or Pay 😈`;
         } else {
           document.getElementById("sendLink").value=location.origin+d.invite_link;
           document.getElementById("doneLead").textContent=`Now ${nameB||"your final boss"} gets to watch. Send them the invite 😈`;
           document.getElementById("openBtn").textContent="Open my dashboard";
           document.getElementById("openBtn").onclick=()=>location.href=d.owner_link;
+          sendText = `Come be my final boss on Push or Pay 😈`;
         }
+        document.getElementById("waSend").href = `https://wa.me/?text=${encodeURIComponent(`${sendText} ${document.getElementById("sendLink").value}`)}`;
         showStep("s-done");
       } catch(err){ msg.textContent=err.message; msg.className="msg err"; btn.disabled=false; }
     });
