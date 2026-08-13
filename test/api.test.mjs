@@ -72,6 +72,12 @@ ok(ch.data.cheers[ch.data.today].length === 1, "cheer recorded");
 eq((await call("share", { id, t: ownerT })).data.shares, 1, "share counted");
 eq((await call("share", { id, t: ownerT }, { cta_pool: "tax_raised", cta_variant: 0 })).data.shares, 2, "tax_raised share counted");
 
+console.log("invite_click — attribute an invite send to the control that fired it");
+eq((await call("invite_click", { id, t: ownerT }, { channel: "copy" })).data.ok, true, "copy click tracked");
+eq((await call("invite_click", { id, t: ownerT }, { channel: "whatsapp_dashboard" })).data.ok, true, "whatsapp_dashboard click tracked");
+eq((await call("invite_click", { id, t: ownerT }, { channel: "whatsapp_dashboard" })).data.ok, true, "whatsapp_dashboard click tracked again");
+eq((await call("invite_click", { id, t: ownerT }, { channel: "not-a-real-channel" })).data.ok, true, "unknown channel doesn't error, just isn't counted");
+
 console.log("push subscribe/unsubscribe");
 {
   eq((await call("push_subscribe", { id, t: partnerT }, { subscription: { endpoint: "https://x", keys: { p256dh: "a", auth: "b" } } })).status, 403, "partner can't enable owner's reminders");
@@ -104,6 +110,9 @@ const st = await call("stats", { key: "testkey123" });
 eq(st.data.totals.signups, 3, "3 signups (original + the 2 invite_variant challenges)");
 eq(st.data.totals.partner_join_by_invite_variant["0"], 50, "invite_variant 0 bucket: original (joined) + negative-clamped (not joined) averages to 50%");
 eq(st.data.totals.partner_join_by_invite_variant["1"], 0, "invite_variant 1 (partner never opened the link) shows 0%");
+eq(st.data.totals.invite_clicks_by_channel.copy, 1, "1 copy invite click attributed");
+eq(st.data.totals.invite_clicks_by_channel.whatsapp_dashboard, 2, "2 whatsapp_dashboard invite clicks attributed");
+ok(!("not-a-real-channel" in st.data.totals.invite_clicks_by_channel), "unknown channel never enters the aggregate");
 eq(st.data.totals.total_sessions, 1, "1 session");
 ok(st.data.totals.partners_joined >= 1, "watcher activation counted");
 eq(st.data.totals.push_enabled, 1, "1 push-enabled signup");

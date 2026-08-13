@@ -215,7 +215,7 @@
       fetch("/api?action=visit", { method: "POST", keepalive: true, headers: {"content-type":"application/json"}, body: JSON.stringify({ ref, platform }) });
     } catch(_){}
 
-    let COPY = {}, heroHookIdx = 0, inviteVariantIdx = 0;
+    let COPY = {}, heroHookIdx = 0, inviteVariantIdx = 0, sentId = "", sentToken = "";
     const rnd = (a) => a && a.length ? a[Math.floor(Math.random()*a.length)] : "";
     fetch("/copy.json").then(r=>r.json()).then(c=>{
       COPY=c;
@@ -264,6 +264,7 @@
         const partner_name = mode==="prank" ? nameA : nameB;
         const res=await fetch("/api?action=create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({owner_name,partner_name,daily_target:document.getElementById("target").value,penalty_amount:document.getElementById("lazytax").value,currency:document.getElementById("currency").value,created_via:mode,hook_variant:heroHookIdx,invite_variant:inviteVariantIdx})});
         const d=await res.json(); if(!res.ok) throw new Error(d.error||"Something went wrong");
+        sentId = d.id;
         let sendText;
         if(mode==="prank"){
           // creator is the collector; send the DOER (partner) their link
@@ -281,10 +282,17 @@
           sendText = `Come be my final boss on Push or Pay 😈`;
         }
         document.getElementById("waSend").href = `https://wa.me/?text=${encodeURIComponent(`${sendText} ${document.getElementById("sendLink").value}`)}`;
+        try { sentToken = new URL(document.getElementById("sendLink").value).searchParams.get("t") || ""; } catch(_){}
         showStep("s-done");
       } catch(err){ msg.textContent=err.message; msg.className="msg err"; btn.disabled=false; }
     });
+    const trackInviteClick = (channel) => {
+      if (!sentId || !sentToken) return;
+      fetch(`/api?action=invite_click&id=${encodeURIComponent(sentId)}&t=${encodeURIComponent(sentToken)}`, { method: "POST", keepalive: true, headers: {"content-type":"application/json"}, body: JSON.stringify({ channel }) }).catch(()=>{});
+    };
+    document.getElementById("waSend").addEventListener("click", () => trackInviteClick("whatsapp_postcreate"));
     document.getElementById("copySend").onclick=async()=>{
+      trackInviteClick("copy");
       const i=document.getElementById("sendLink");
       const ownerVal=document.getElementById("owner").value;
       const text = mode==="prank" ? `${ownerVal||"Someone"} just challenged you to Push or Pay 😈` : `Come be my final boss on Push or Pay 😈`;

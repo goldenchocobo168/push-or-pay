@@ -172,7 +172,7 @@ async function handler(req) {
       const today = todaySGT();
       let signups = 0, partners = 0, totalSessions = 0, shares = 0, activated = 0, retained2 = 0, retained7 = 0, activeLast7 = 0, pranks = 0;
       let activePairs = 0, visitsTotal = 0, pushEnabled = 0;
-      const byDay = {}, recent = [], byVia = {}, byHook = {}, byInvite = {}, ctaTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
+      const byDay = {}, recent = [], byVia = {}, byHook = {}, byInvite = {}, ctaTotals = {}, inviteClickTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
       for (const b of blobs) {
         if (b.key.startsWith("visits:")) {
           const v = await store.get(b.key, { type: "json" });
@@ -208,6 +208,7 @@ async function handler(req) {
         // and never see it, so excluding them keeps this calibration signal clean.
         if (via === "self" && c.invite_variant !== undefined && c.invite_variant !== null) (byInvite[c.invite_variant] ||= []).push(partnerJoined ? 1 : 0);
         if (c.shares_by_cta) for (const [k, v] of Object.entries(c.shares_by_cta)) ctaTotals[k] = (ctaTotals[k] || 0) + v;
+        if (c.invite_clicks_by_channel) for (const [k, v] of Object.entries(c.invite_clicks_by_channel)) inviteClickTotals[k] = (inviteClickTotals[k] || 0) + v;
         const day = c.start_date || (c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "?");
         byDay[day] = (byDay[day] || 0) + 1;
         const m = compute(c);
@@ -234,6 +235,7 @@ async function handler(req) {
           push_enabled_rate: signups ? +(pushEnabled / signups * 100).toFixed(1) : 0,
           active_pairs: activePairs, sessions_by_via: sessionsByVia,
           sessions_by_hook_variant: sessionsByHook, partner_join_by_invite_variant: partnerJoinByInvite, shares_by_cta_variant: ctaTotals,
+          invite_clicks_by_channel: inviteClickTotals,
           retention_2d: signups ? +(retained2 / signups * 100).toFixed(1) : 0,
           retention_7d: signups ? +(retained7 / signups * 100).toFixed(1) : 0,
           activation_rate: signups ? +(activated / signups * 100).toFixed(1) : 0,
@@ -385,6 +387,18 @@ async function handler(req) {
       }
       await store.setJSON(id, c);
       return json({ ok: true, shares: c.share_count });
+    }
+
+    // ---- invite_click (attribution: which invite control did the sending?) --
+    if (action === "invite_click") {
+      const b = await req.json().catch(() => ({}));
+      const channel = ["copy", "whatsapp_dashboard", "whatsapp_postcreate"].includes(b.channel) ? b.channel : "";
+      if (channel) {
+        c.invite_clicks_by_channel = c.invite_clicks_by_channel || {};
+        c.invite_clicks_by_channel[channel] = (c.invite_clicks_by_channel[channel] || 0) + 1;
+        await store.setJSON(id, c);
+      }
+      return json({ ok: true });
     }
 
     return json({ error: "unknown action" }, 400);

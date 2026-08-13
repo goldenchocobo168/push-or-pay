@@ -141,10 +141,12 @@
       </div>`;
     const sb = document.getElementById("startBtn"); if (sb) sb.onclick = () => renderSession(d);
     const ci = document.getElementById("copyInvite"); if (ci) ci.onclick = async () => {
+      api("invite_click", { channel: "copy" }).catch(() => {});
       const url = document.getElementById("inviteInput").value;
       if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text: `${d.partner_name}, you're my final boss on Push or Pay 😈`, url }); return; } catch (_) {} }
       copy(url, "Invite copied 📋 — send it over 😈");
     };
+    const wi = document.getElementById("waInvite"); if (wi) wi.onclick = () => { api("invite_click", { channel: "whatsapp_dashboard" }).catch(() => {}); };
     const ack = document.getElementById("ackBtn"); if (ack) ack.onclick = async () => { try { render(await api("lazy_tax_ack", {})); } catch (e) { toast(e.message); } };
     wireHeat(d); wireShare(d); wireShareTaxRaised(d); wirePushPrompt(d); wireIosHint();
   }
