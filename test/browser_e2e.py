@@ -5,7 +5,7 @@ session -> complete -> watcher invitation -> accept -> watcher dashboard."""
 import json, os, time, sys, urllib.request, base64, websocket
 
 CDP = "http://localhost:9222"
-BASE = sys.argv[1] if len(sys.argv) > 1 else "https://pushorpay.netlify.app"
+BASE = sys.argv[1] if len(sys.argv) > 1 else "https://push-or-pay.vercel.app"
 TEST_KEY = os.environ.get("TIBO_TEST_KEY", "")
 
 def http(path, method="GET"): return json.load(urllib.request.urlopen(urllib.request.Request(CDP + path, method=method)))

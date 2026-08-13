@@ -28,7 +28,7 @@ if git fetch "$REMOTE_URL" deploy >/dev/null 2>&1; then
   if ! git merge-base --is-ancestor FETCH_HEAD HEAD; then
     echo "[deploy] WARNING: HEAD is missing commits from origin/deploy (last live tree)."
     echo "[deploy] Deploying now may silently revert previously-shipped fixes. Files that differ:"
-    git diff FETCH_HEAD...HEAD --stat -- public netlify
+    git diff FETCH_HEAD...HEAD --stat -- public api lib
     if [ "${DEPLOY_FORCE:-0}" != "1" ]; then
       echo "[deploy] Aborting — rebase/merge origin/deploy into this branch first, or set DEPLOY_FORCE=1 if this is an intentional revert."
       exit 1

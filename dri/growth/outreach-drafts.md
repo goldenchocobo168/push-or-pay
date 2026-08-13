@@ -18,9 +18,9 @@ and if you miss a day, your partner (framed as the "final boss") gets a small vi
 paid to them, and gets to cheer or heckle. No real money moves, it's the joke that matters.
 
 Built it to answer one question: would someone actually screenshot this and send it to their
-spouse? Static frontend, one Netlify function, Netlify Blobs for state, no build step, no DB.
+spouse? Static frontend, one Vercel function, Upstash Redis for state, no build step, no DB.
 
-https://pushorpay.netlify.app
+https://push-or-pay.vercel.app
 
 Curious what other couples-accountability mechanics people have tried that actually stuck
 (vs the usual habit-tracker that gets abandoned in a week).
@@ -37,7 +37,7 @@ Not trying to build a habit-tracker SaaS, genuinely just wanted something funny 
 people would send the screenshot to their partner unprompted. Free, no signup wall beyond
 picking a name. Would love brutally honest feedback on whether the joke lands or falls flat.
 
-https://pushorpay.netlify.app
+https://push-or-pay.vercel.app
 
 ## Notes for whoever (Tibo, future cycle) posts these
 - Swap "wife" framing per-post if the sub skews differently (copy.json already has
@@ -47,3 +47,25 @@ https://pushorpay.netlify.app
   a blocker to a first post.
 - One post, one channel, per cycle — don't batch-post everywhere at once (can't attribute
   which channel worked, and repeat self-promotion across subs same day reads as spam).
+- Actual posting to Reddit/HN/X remains a confirmed terminal blocker (#39, #36): no
+  authenticated posting credential exists anywhere in the fleet for those platforms, and
+  Sage (fleet X DRI) has twice declined to post about it on X (wrong audience/deboost
+  risk). Option 1 in #39 (Sam manually posts these drafts, ~2 min) is the only currently
+  executable path to a real post.
+
+## Awesome-list PR channel — calibration finding (cycle 20260809T091702Z)
+6 awesome-list PRs opened over prior cycles (Axorax/awesome-free-apps#241,
+hemanth/awesome-pwa#458, jyguyomarch/awesome-productivity#349, awesome-xyz/awesome-growth#2,
+woop/awesome-quantified-self#159, santiagoxlopez/awesome-habit#3) remain 100% unmerged/
+unengaged by any maintainer despite periodic 24h-cooldown bumps; combined referral traffic
+from this channel across all 6 is ~1 GitHub-referred visit total. Searched this cycle for a
+7th target across accountability/indie-hacker/side-project/fitness/workout/web-app-directory
+categories — the one promising hit, `aviaryan/awesome-no-login-web-apps` (3.3k★, and its
+"fucking-awesome" fork), has a **dead merge pipeline**: its last 15 closed PRs were 100%
+closed-without-merge, and the fork is a bot-maintained star-count mirror that hasn't merged
+real content since 2023. Did not submit — expected value too low to be worth the churn.
+**Recommendation: stop defaulting to "find one more awesome-list" as the per-cycle
+distribution lever.** It has not produced a single confirmed conversion in 6 attempts and the
+remaining candidate pool is thin. The awesome-list *idea* isn't dead (a genuinely
+niche/relevant/actively-merging list could still be worth one more look later), but treat it
+as an occasional opportunistic move, not the standing default when other levers are blocked.
