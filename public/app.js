@@ -303,18 +303,71 @@
   }
 
   // ============ shared ============
+  // Renders a dark, on-brand streak card to a PNG file for image-attached
+  // sharing — the literal "would you send this screenshot" test from the
+  // product spec, not just a text message with a link.
+  function wrapCanvasText(ctx, text, cx, cy, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    const lines = [];
+    let line = "";
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w; }
+      else line = test;
+    }
+    if (line) lines.push(line);
+    const startY = cy - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach((l, i) => ctx.fillText(l, cx, startY + i * lineHeight));
+  }
+  async function buildShareCardFile(streak, headline) {
+    try {
+      const W = 1080, H = 1080;
+      const canvas = document.createElement("canvas");
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
+      ctx.fillStyle = "#08080c"; ctx.fillRect(0, 0, W, H);
+      const glow = ctx.createRadialGradient(W / 2, H * 0.34, 40, W / 2, H * 0.34, 560);
+      glow.addColorStop(0, "rgba(255,138,61,0.30)");
+      glow.addColorStop(1, "rgba(255,138,61,0)");
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ff8a3d";
+      ctx.font = "700 200px system-ui, -apple-system, sans-serif";
+      ctx.fillText(`🔥${streak}`, W / 2, H * 0.4);
+      ctx.fillStyle = "#9a9bb0";
+      ctx.font = "700 38px system-ui, -apple-system, sans-serif";
+      ctx.fillText(streak === 1 ? "DAY STREAK" : "DAY STREAK", W / 2, H * 0.47);
+      ctx.fillStyle = "#f5f6fa";
+      ctx.font = "600 54px system-ui, -apple-system, sans-serif";
+      wrapCanvasText(ctx, headline, W / 2, H * 0.63, W - 180, 66);
+      ctx.fillStyle = "#8b7cff";
+      ctx.font = "700 42px system-ui, -apple-system, sans-serif";
+      ctx.fillText("Push or Pay", W / 2, H * 0.92);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      return blob ? new File([blob], "streak.png", { type: "image/png" }) : null;
+    } catch (_) { return null; }
+  }
+  async function shareWithCard(d, headline, text) {
+    const file = await buildShareCardFile(d.streak, headline);
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: "Push or Pay", text }); return; } catch (_) {}
+    }
+    if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); return; } catch (_) {} }
+    try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); }
+  }
   function wireShare(d) {
     const sb = document.getElementById("shareBtn"); if (!sb) return;
     sb.onclick = async () => {
       const owed = d.partner_earned > 0;
       const pool = owed ? COPY.share_owed : COPY.share_clean;
       const variant = pickIdx(pool);
+      const line = owed ? pick(COPY.share_owed) : pick(COPY.share_clean);
       const text = owed
-        ? `😭 ${d.partner_name} earned ${d.week_earned_display} this week off my skipped push-ups. ${pick(COPY.share_owed)} Push or Pay.`
-        : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. ${pick(COPY.share_clean)} Push or Pay.`;
+        ? `😭 ${d.partner_name} earned ${d.week_earned_display} this week off my skipped push-ups. ${line} Push or Pay.`
+        : `🔥 ${d.streak}-day push-up streak — ${d.partner_name} earned nothing off me. ${line} Push or Pay.`;
       api("share", { cta_pool: owed ? "owed" : "clean", cta_variant: variant }).catch(() => {});
-      if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
-      else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
+      await shareWithCard(d, owed ? `${d.partner_name} earned ${d.week_earned_display} off me this week 😭` : line, text);
     };
   }
   function wireShareTaxRaised(d) {
@@ -323,8 +376,7 @@
       const variant = pickIdx(COPY.share_tax_raised);
       const text = `😭 ${d.partner_name} just raised my Lazy Tax to ${d.lazy_tax_update.to}. ${pick(COPY.share_tax_raised)} Push or Pay.`;
       api("share", { cta_pool: "tax_raised", cta_variant: variant }).catch(() => {});
-      if (navigator.share) { try { await navigator.share({ title: "Push or Pay", text, url: location.origin }); } catch (_) {} }
-      else { try { await navigator.clipboard.writeText(text + " " + location.origin); toast("Copied — paste it anywhere 📣"); } catch (_) { toast(text); } }
+      await shareWithCard(d, `${d.partner_name} just raised my Lazy Tax to ${d.lazy_tax_update.to} 😈`, text);
     };
   }
   const copy = async (v, m) => { try { await navigator.clipboard.writeText(v); } catch (_) {} toast(m); };
