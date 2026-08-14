@@ -90,6 +90,9 @@
     const banner = d.lazy_tax_update
       ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button><button class="btn fire" id="shareTaxBtn" style="margin-top:8px">Screenshot this 📸</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
+    // One session away from the first-ever "active pair" (partner joined + 3 logged
+    // days) — a real habit milestone that's otherwise invisible to the user.
+    const oneAwayFromActivePair = d.accepted && !d.today_done && Object.keys(d.sessions || {}).length === 2;
     // hero varies by mode: normal (x/30) · challenge complete · Secret/Hardcore (uncapped + tier)
     let heroTop, heroSub;
     if (d.secret_unlocked) {
@@ -117,6 +120,7 @@
             ${d.today_done
               ? `<button class="btn block" disabled style="margin-top:12px">Done today ✅</button>`
               : `<button class="btn block lg" id="startBtn" style="margin-top:12px">Start</button>`}
+            ${oneAwayFromActivePair ? `<p class="hint" style="margin-top:8px">${esc(pick(COPY.milestone_close))}</p>` : ""}
             ${cheersRow(d)}
             ${showPushPrompt(d) ? `<button class="btn ghost block" id="notifyBtn" style="margin-top:10px">${esc(pick(COPY.push_prompt))}</button>` : ""}
             ${showIOSHint(d) ? `<p class="hint" id="iosHint" style="margin-top:10px">${esc(pick(COPY.push_ios_hint))}</p>` : ""}
