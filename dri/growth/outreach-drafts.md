@@ -18,7 +18,9 @@ and if you miss a day, your partner (framed as the "final boss") gets a small vi
 paid to them, and gets to cheer or heckle. No real money moves, it's the joke that matters.
 
 Built it to answer one question: would someone actually screenshot this and send it to their
-spouse? Static frontend, one Vercel function, Upstash Redis for state, no build step, no DB.
+spouse? As of this week the share button actually attaches a generated image card (streak,
+who-owes-who, the punchline) instead of just a link, so the screenshot IS the share. Static
+frontend, one Vercel function, Upstash Redis for state, no build step, no DB.
 
 https://push-or-pay.vercel.app
 
@@ -31,7 +33,8 @@ Curious what other couples-accountability mechanics people have tried that actua
 **Body:**
 Built a tiny web app: you set a daily push-up streak, pick a partner, and if you miss a day
 they get a (virtual) penalty payout and a screen that says something like "your wife earned
-$10 today, congrats on your laziness." She gets to cheer, heckle, or raise the stakes.
+$10 today, congrats on your laziness." She gets to cheer, heckle, or raise the stakes. Hit
+"share" and it generates an actual image card of the streak/penalty, not just a text link.
 
 Not trying to build a habit-tracker SaaS, genuinely just wanted something funny enough that
 people would send the screenshot to their partner unprompted. Free, no signup wall beyond
@@ -69,3 +72,19 @@ distribution lever.** It has not produced a single confirmed conversion in 6 att
 remaining candidate pool is thin. The awesome-list *idea* isn't dead (a genuinely
 niche/relevant/actively-merging list could still be worth one more look later), but treat it
 as an occasional opportunistic move, not the standing default when other levers are blocked.
+
+## Refreshed for the two newest features (cycle 20260814T171700Z)
+Both Show HN and Reddit drafts above now mention the image-attached share card (#116, shipped
+2026-08-14) since it's the strongest available proof of the literal North Star pitch ("would
+someone screenshot this") — worth leading with whenever these actually get posted. Did NOT
+ship any new in-app copy/code this cycle: two nudges are already mid-flight and unread
+(#116 image share card ~16h live, #118 milestone_close nudge ~8h live, target cb22bd07 still
+at sessions=2) — a third overlapping change now would make it impossible to attribute whichever
+one (if either) eventually moves shared/active_pairs. Re-confirmed this cycle that every
+distribution channel remains genuinely blocked, not just under-tried: Reddit/HN/X need a
+credential nobody in the fleet holds (#39, terminal), roundup-blog outreach needs a human email
+identity (#56, terminal), awesome-lists are deliberately sunset (6/6 zero engagement), GSC
+verification needs a token only obtainable via the Google account UI (#60), and Sage has twice
+declined to post about this product on X (wrong-audience/deboost risk, per the note above).
+Nothing new to try this cycle beyond keeping this draft current for the moment Sam (or a future
+channel) actually executes it.
