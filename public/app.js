@@ -93,6 +93,10 @@
     // One session away from the first-ever "active pair" (partner joined + 3 logged
     // days) — a real habit milestone that's otherwise invisible to the user.
     const oneAwayFromActivePair = d.accepted && !d.today_done && Object.keys(d.sessions || {}).length === 2;
+    // Real engagement (2+ logged sessions) with no partner yet — the actual funnel
+    // bottleneck (20% partner-join vs 80% activation). Mirrors milestone_close but
+    // targets the invite step, not the session-count step.
+    const engagedNotJoined = !d.accepted && Object.keys(d.sessions || {}).length >= 2;
     // hero varies by mode: normal (x/30) · challenge complete · Secret/Hardcore (uncapped + tier)
     let heroTop, heroSub;
     if (d.secret_unlocked) {
@@ -132,7 +136,8 @@
             ${d.accepted
               ? `<p class="hint">They're in the game — cheering, teasing, and one tap away from raising your Lazy Tax. 😈</p>`
               : `<div class="lk"><input readonly id="inviteInput" value="${location.origin + d.invite_link}" /><button class="copy" id="copyInvite">Copy</button><a class="copy" id="waInvite" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`${d.partner_name}, you're my final boss on Push or Pay 😈 ${location.origin + d.invite_link}`)}">WhatsApp</a></div>
-                 <p class="hint">${esc(inviteHint(d))}</p>`}
+                 <p class="hint">${esc(inviteHint(d))}</p>
+                 ${engagedNotJoined ? `<p class="hint" style="margin-top:6px">${esc(pick(COPY.invite_urgency))}</p>` : ""}`}
           </div>
           <div class="card"><h2>Your journey</h2>${heatmapHTML(d.heat)}</div>
           <div class="card center lazy-card">
