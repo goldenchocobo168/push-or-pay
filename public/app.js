@@ -42,7 +42,12 @@
   const pick = (arr) => (arr && arr.length ? arr[pickIdx(arr)] : "");
   // Invite-card hint: fixed per challenge (server-persisted invite_variant), not
   // re-randomized per render, so partner_join_by_invite_variant measures a stable copy.
-  const inviteHint = (d) => { const arr = COPY.invite_hint; return arr && arr.length ? arr[(d.invite_variant || 0) % arr.length] : "Send it over — the fun starts the moment they open it. 😈"; };
+  // Day-zero variant: use day_zero_invite pool for users who haven't started yet.
+  const inviteHint = (d) => {
+    const isDayZero = d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0);
+    const arr = isDayZero ? COPY.day_zero_invite : COPY.invite_hint;
+    return arr && arr.length ? arr[(d.invite_variant || 0) % arr.length] : "Send it over — the fun starts the moment they open it. 😈";
+  };
   const money2 = (a, cur) => { cur = cur || "$"; const n = cur === "Rp" ? Number(a).toLocaleString("en-US") : a; return `${cur}${cur === "Rp" ? " " : ""}${n}`; };
   const fmtDur = (s) => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
   const niceDate = (iso) => { const [y, m, dd] = iso.split("-"); return new Date(Date.UTC(+y, +m - 1, +dd)).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
@@ -89,6 +94,9 @@
   function renderOwnerDashboard(d) {
     const banner = d.lazy_tax_update
       ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button><button class="btn fire" id="shareTaxBtn" style="margin-top:8px">Screenshot this 📸</button></div>` : "";
+    // Day-0 nudge: activate users who signed up but never started (streak=0 + sessions=0)
+    const dayZeroNudge = (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0))
+      ? `<div class="card banner" style="background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)"><div style="font-size:18px;margin-bottom:8px">🚨 <b>Day 1 waiting</b></div><div style="font-size:16px;margin-bottom:12px">${esc(pick(COPY.first_session_nudge))}</div><button class="btn ghost" id="startFromNudgeBtn" style="background:rgba(255,255,255,0.2)">Start now 💪</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
     // One session away from the first-ever "active pair" (partner joined + 3 logged
     // days) — a real habit milestone that's otherwise invisible to the user.
@@ -112,6 +120,7 @@
     }
     app.innerHTML = `
       ${banner}
+      ${dayZeroNudge}
       <div class="app-grid">
         <div style="display:flex;flex-direction:column;gap:14px">
           <div class="hero-streak${d.secret_unlocked ? " secret" : ""}">
@@ -149,6 +158,7 @@
         </div>
       </div>`;
     const sb = document.getElementById("startBtn"); if (sb) sb.onclick = () => renderSession(d);
+    const snb = document.getElementById("startFromNudgeBtn"); if (snb) snb.onclick = () => renderSession(d);
     const ci = document.getElementById("copyInvite"); if (ci) ci.onclick = async () => {
       api("invite_click", { channel: "copy" }).catch(() => {});
       const url = document.getElementById("inviteInput").value;
