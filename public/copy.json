@@ -37,6 +37,12 @@
     "Nice. Your wallet lives to fight another day.",
     "Done. Your partner is mildly disappointed. 😏"
   ],
+  "first_session_nudge": [
+    "Still thinking about it? Your partner's coffee fund is waiting.",
+    "Day 1 is the hardest. Day 2 is easier. Start now.",
+    "Your streak: 0. Your partner's disappointment: growing.",
+    "The floor is literally right there. 10 pushups. You got this."
+  ],
   "skip": [
     "Tough day. Your partner just won this round. 🏆",
     "A skip day. Someone's coffee fund thanks you. 🧋",
@@ -57,13 +63,25 @@
     "My partner discovered passive income. Unfortunately, it's my laziness.",
     "Send help. Or push-ups.",
     "My partner thinks this is the best game ever. I'm starting to agree. 😈",
-    "The only app where my partner actively roots for me to fail. In a fun way."
+    "The only app where my partner actively roots for me to fail. In a fun way.",
+    "My wife made $20 from my missed pushups today. She's way too happy about this.",
+    "3 missed days. My partner's coffee fund is fully funded for the month. 😈",
+    "The app where your partner literally profits from your laziness. Guess who's winning?"
   ],
   "share_clean": [
     "Untouchable. My partner earned nothing.",
     "The green wall stands. 🟩",
     "Streak intact, wallet intact.",
-    "Make your partner regret that lazy day."
+    "Make your partner regret that lazy day.",
+    "3-week streak alive. My partner's bubble tea fund remains at $0. 💪",
+    "Another day, another session logged, zero money transferred to my partner.",
+    "My partner is actually disappointed I didn't skip today. This game works."
+  ],
+  "share_partner_gloat": [
+    "Your lazy streak just cost you. My coffee fund thanks you. 💸",
+    "Day 3 missed. Your wallet, my gain. 😈",
+    "They skipped again. I'm 3 for 3 on the lazy tax this week.",
+    "My partner's missed sessions = my Friday night treat fund. 💪"
   ],
   "come_back": [
     "Same time tomorrow. Don't let it get comfortable. 🔥",
@@ -71,6 +89,9 @@
     "One down. Skip tomorrow and it's their payday. 😈"
   ],
   "push_prompt": [
+    "🔔 Stop my partner from stealing my money",
+    "🔔 Protect my wallet. Remind me.",
+    "🔔 Don't let them profit from my laziness",
     "🔔 Nudge me before I forget tomorrow",
     "🔔 Tap me on the shoulder if I'm about to skip",
     "🔔 Don't let me accidentally fund their bubble tea"
@@ -112,6 +133,9 @@
   "invite_urgency": [
     "You're actually doing the work. Nobody's watching yet — fix that.",
     "Real streak, zero final boss. Send the invite already. 😈",
-    "This is funnier with a witness. Send it."
+    "This is funnier with a witness. Send it.",
+    "You've logged 2+ sessions. Imagine how much more fun this is with your partner rooting for (and betting on) your failure. 😈",
+    "This streak is legit. Send the invite and make it official — they'll never let you quit now.",
+    "Your partner is literally one click away from becoming your accountability villain. Send the link. 😈"
   ]
 }
