@@ -120,6 +120,11 @@
     "Their lazy days = your bubble tea fund. 😈",
     "Be the final boss. Send the invite. 👀"
   ],
+  "invite_hint_v3": [
+    "Make this your thing. Send the invite. 😈",
+    "The inside joke you two build together. Send it. 😈",
+    "Be the reason they don't skip. Send the invite. 💪"
+  ],
   "push_ios_hint": [
     "📲 iPhone: tap Share → Add to Home Screen for tomorrow's nudge",
     "📲 On iPhone? Add to Home Screen so we can tap you on the shoulder tomorrow",
@@ -137,5 +142,11 @@
     "You've logged 2+ sessions. Imagine how much more fun this is with your partner rooting for (and betting on) your failure. 😈",
     "This streak is legit. Send the invite and make it official — they'll never let you quit now.",
     "Your partner is literally one click away from becoming your accountability villain. Send the link. 😈"
+  ],
+  "day_zero_invite": [
+    "Send the invite first. They're rooting for you to fail. 😈",
+    "Get your final boss in the game before you start.",
+    "Make this official: invite them, then do your push-ups.",
+    "The stakes are higher when someone's watching. Send the invite."
   ]
 }
