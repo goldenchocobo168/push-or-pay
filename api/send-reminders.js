@@ -26,16 +26,34 @@ function hashSeed(s) {
 export async function runSendReminders(store, send) {
   const { blobs } = await store.list();
   const today = todaySGT();
-  let sent = 0, skipped = 0, cleaned = 0, failed = 0;
+  let sent = 0, skipped = 0, cleaned = 0, failed = 0, firstSessionNudges = 0;
   for (const b of blobs) {
     if (b.key.startsWith("visits:")) continue;
     const c = await store.get(b.key, { type: "json" });
     if (!c || !c.id || !c.push_subscription || c.is_test) continue;
     if (isDone(c, today)) { skipped++; continue; }
-    const body = pick(COPY.push_reminder, hashSeed(c.id + today)) || "Your streak is still waiting on you. 🔥";
+
+    // First session nudge: 24h after signup, if sessions=0, send once instead of regular reminder
+    const sessionCount = Object.keys(c.sessions || {}).length;
+    const hoursSinceCreation = (Date.now() - (c.created_at || 0)) / 36e5;
+    const shouldNudgeFirstSession = sessionCount === 0 && hoursSinceCreation >= 24 && !c.first_session_nudge_sent;
+
+    let body, shouldMarkNudgeSent = false;
+    if (shouldNudgeFirstSession) {
+      body = pick(COPY.first_session_nudge, hashSeed(c.id)) || "Your first session is waiting. Start now!";
+      shouldMarkNudgeSent = true;
+    } else {
+      body = pick(COPY.push_reminder, hashSeed(c.id + today)) || "Your streak is still waiting on you. 🔥";
+    }
+
     const payload = JSON.stringify({ title: "Push or Pay", body, url: `/c/${c.id}?t=${c.owner_token}` });
     try {
       await send(c.push_subscription, payload);
+      if (shouldMarkNudgeSent) {
+        firstSessionNudges++;
+        c.first_session_nudge_sent = true;
+        await store.setJSON(c.id, c);
+      }
       sent++;
     } catch (e) {
       const status = e && (e.statusCode || e.status);
@@ -49,7 +67,7 @@ export async function runSendReminders(store, send) {
       }
     }
   }
-  return { sent, skipped, cleaned, failed };
+  return { sent, skipped, cleaned, failed, firstSessionNudges };
 }
 
 async function handler(req) {
