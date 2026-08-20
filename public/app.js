@@ -95,8 +95,9 @@
     const banner = d.lazy_tax_update
       ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button><button class="btn fire" id="shareTaxBtn" style="margin-top:8px">Screenshot this 📸</button></div>` : "";
     // Day-0 nudge: activate users who signed up but never started (streak=0 + sessions=0)
+    // Made more prominent with emoji, larger text, and urgent styling to combat 76% drop-off
     const dayZeroNudge = (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0))
-      ? `<div class="card banner" style="background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)"><div style="font-size:18px;margin-bottom:8px">🚨 <b>Day 1 waiting</b></div><div style="font-size:16px;margin-bottom:12px">${esc(pick(COPY.first_session_nudge))}</div><button class="btn ghost" id="startFromNudgeBtn" style="background:rgba(255,255,255,0.2)">Start now 💪</button></div>` : "";
+      ? `<div class="card banner" style="background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);border:2px solid #ff4757;box-shadow:0 4px 20px rgba(255,107,107,0.4)"><div style="font-size:20px;margin-bottom:12px;font-weight:bold">🚨 DAY 1 WAITING</div><div style="font-size:18px;margin-bottom:16px;line-height:1.4">${esc(pick(COPY.first_session_nudge))}</div><button class="btn fire block" id="startFromNudgeBtn" style="background:rgba(255,255,255,0.95);color:#ee5a6f;font-weight:bold;padding:14px 20px;border-radius:8px">Start now 💪</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
     // One session away from the first-ever "active pair" (partner joined + 3 logged
     // days) — a real habit milestone that's otherwise invisible to the user.
