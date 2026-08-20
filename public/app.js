@@ -449,8 +449,16 @@
   }
 
   if (!id || !token) { app.innerHTML = errHtml("This link is missing its access token. Ask for the full link."); return; }
+  const startParam = new URLSearchParams(location.search).get("start");
   Promise.all([fetch("/copy.json").then(r => r.json()).catch(() => ({})), api("get")]).then(([c, d]) => {
-    COPY = c; seed = (d.missed_count || 0) + (d.streak || 0); render(d);
+    COPY = c; seed = (d.missed_count || 0) + (d.streak || 0);
+    if (startParam === "first" && d.role === "owner") {
+      render(d); // render dashboard first to initialize state
+      // Trigger session logging immediately after a brief delay
+      setTimeout(() => renderSession(d), 500);
+    } else {
+      render(d);
+    }
   }).catch((e) => { app.innerHTML = errHtml(e.message); });
   function errHtml(m) { return `<p class="msg err">${esc(m)}</p><p class="msg"><a href="/">Start a challenge →</a></p>`; }
 })();

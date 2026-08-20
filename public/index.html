@@ -179,7 +179,8 @@
           <p class="lead" id="doneLead">Now your final boss gets to watch. Send them the invite:</p>
           <p class="hint" style="margin: 12px 0; color: var(--accent);">💡 Send it now — the fun starts the moment they open it. They'll root for your failure in the best way possible.</p>
           <div class="lk"><input readonly id="sendLink" /><button class="copy" id="copySend">Copy</button><a class="copy" id="waSend" target="_blank" rel="noopener" href="#">WhatsApp</a></div>
-          <button class="btn block lg" id="openBtn" style="margin-top:16px">Open my dashboard</button>
+          <button class="btn block lg accent" id="firstSessionBtn" style="margin-top:16px">💪 Do my first session now</button>
+          <button class="btn block lg" id="openBtn" style="margin-top:8px">Open my dashboard</button>
           <p class="hint center">Bookmark <b>your page</b> after it opens — it's your streak HQ.</p>
         </div>
       </div>
@@ -274,12 +275,14 @@
           document.getElementById("doneLead").innerHTML=`Send this to <b>${nameB||"them"}</b>. Picture their face when they open it… 😏`;
           document.getElementById("openBtn").textContent="Open my (watcher) dashboard";
           document.getElementById("openBtn").onclick=()=>location.href=d.invite_link;
+          document.getElementById("firstSessionBtn").onclick=()=>location.href=d.invite_link+"&start=first";
           sendText = `${nameA||"Someone"} just challenged you to Push or Pay 😈`;
         } else {
           document.getElementById("sendLink").value=location.origin+d.invite_link;
           document.getElementById("doneLead").textContent=`Now ${nameB||"your final boss"} gets to watch. Send them the invite 😈`;
           document.getElementById("openBtn").textContent="Open my dashboard";
           document.getElementById("openBtn").onclick=()=>location.href=d.owner_link;
+          document.getElementById("firstSessionBtn").onclick=()=>location.href=d.owner_link+"&start=first";
           sendText = `Come be my final boss on Push or Pay 😈`;
         }
         document.getElementById("waSend").href = `https://wa.me/?text=${encodeURIComponent(`${sendText} ${document.getElementById("sendLink").value}`)}`;
