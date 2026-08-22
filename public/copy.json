@@ -1,11 +1,14 @@
 {
   "hook": [
+    "Build a tiny habit. Make your partner laugh doing it.",
     "Who profits when you skip?",
+    "10 push-ups. That's it.",
     "A funny game you play with your partner.",
     "Skip your push-ups. Fund their bubble tea.",
     "Skip today. Meet the final boss tomorrow.",
     "The only app where your partner WANTS you to fail.",
-    "Build a tiny habit. Make your partner laugh doing it."
+    "Tiny habits. Real stakes. A partner who keeps you honest.",
+    "Build tiny habits with your partner (not a fitness app)."
   ],
   "warning": [
     "Do NOT show this app to your spouse… unless you're serious about building habits.",
@@ -39,10 +42,12 @@
     "Done. Your partner is mildly disappointed. 😏"
   ],
   "first_session_nudge": [
-    "Still thinking about it? Your partner's coffee fund is waiting.",
-    "Day 1 is the hardest. Day 2 is easier. Start now.",
-    "Your streak: 0. Your partner's disappointment: growing.",
-    "The floor is literally right there. 10 pushups. You got this."
+    "🚨 Day 1 waiting — your partner is counting on you to skip. Prove them wrong.",
+    "🚨 The floor is right there. 10 pushups. Day 1 is the hardest — start now.",
+    "🚨 Your streak: 0. Your partner's coffee fund: waiting. Start Day 1.",
+    "🚨 Day 1 is the only hard day. Do it now and the rest is easy. 💪",
+    "🚨 Floor. Push-ups. Done. One minute, then you're winning. Start Day 1.",
+    "🚨 10 push-ups. 60 seconds. Your streak starts NOW. One rep, then you're winning."
   ],
   "skip": [
     "Tough day. Your partner just won this round. 🏆",
@@ -60,6 +65,9 @@
     "This is what betrayal looks like."
   ],
   "share_owed": [
+    "My partner made $50 this week. They're way too happy about my laziness. 😈",
+    "5 missed days. Their coffee fund is fully funded for the month. I'm the problem.",
+    "The app where your partner literally profits from your failed habits. Guess who's winning?",
     "Time to get stronger.",
     "My partner discovered passive income. Unfortunately, it's my laziness.",
     "Send help. Or push-ups.",
@@ -70,14 +78,14 @@
     "The app where your partner literally profits from your laziness. Guess who's winning?"
   ],
   "share_clean": [
-    "Untouchable. My partner earned nothing.",
-    "The green wall stands. 🟩",
-    "Streak intact, wallet intact.",
-    "Make your partner regret that lazy day.",
     "3-week streak alive. My partner's bubble tea fund remains at $0. 💪",
     "Another day, another session logged, zero money transferred to my partner.",
     "My partner is actually disappointed I didn't skip today. This game works.",
-    "My partner was genuinely disappointed when I actually did my pushups today. This backfired."
+    "My partner was genuinely disappointed when I actually did my pushups today. This backfired.",
+    "Untouchable. My partner earned nothing.",
+    "The green wall stands. 🟩",
+    "Streak intact, wallet intact.",
+    "Make your partner regret that lazy day."
   ],
   "share_partner_gloat": [
     "Your lazy streak just cost you. My coffee fund thanks you. 💸",
@@ -115,7 +123,10 @@
     "30 seconds to send. The moment they open it, there's no backing out. 😈",
     "You get paid when they skip. Send the invite. 💸",
     "Their lazy days = your bubble tea fund. 😈",
-    "Be the final boss. Send the invite. 👀"
+    "Be the final boss. Send the invite. 👀",
+    "Make this your thing. The inside joke you two build together. 😈",
+    "The ritual you both do. Send it. 😈",
+    "Be the reason they don't skip. Send the invite. 💪"
   ],
   "invite_hint_v2": [
     "You get paid when they skip. Send the invite. 💸",
@@ -125,6 +136,11 @@
   "invite_hint_v3": [
     "Make this your thing. Send the invite. 😈",
     "The inside joke you two build together. Send it. 😈",
+    "Be the reason they don't skip. Send the invite. 💪"
+  ],
+  "invite_hint_v4": [
+    "Make this your thing. The inside joke you two build together. 😈",
+    "The ritual you both do. Send it. 😈",
     "Be the reason they don't skip. Send the invite. 💪"
   ],
   "push_ios_hint": [

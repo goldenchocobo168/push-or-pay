@@ -174,9 +174,10 @@ async function handler(req) {
       let activePairs = 0, visitsTotal = 0, pushEnabled = 0;
       const byDay = {}, recent = [], byVia = {}, byHook = {}, byInvite = {}, ctaTotals = {}, inviteClickTotals = {}, visitsByDay = {}, visitsByRef = {}, visitsByPlatform = {};
       for (const b of blobs) {
-        if (b.key.startsWith("visits:")) {
-          const v = await store.get(b.key, { type: "json" });
-          const day = b.key.slice("visits:".length);
+        const key = String(b.key || "");
+        if (key.startsWith("visits:")) {
+          const v = await store.get(key, { type: "json" });
+          const day = key.slice("visits:".length);
           const count = Number((v && v.count) || 0);
           visitsByDay[day] = count;
           visitsTotal += count;
@@ -184,7 +185,7 @@ async function handler(req) {
           if (v && v.by_platform) for (const [k, n] of Object.entries(v.by_platform)) visitsByPlatform[k] = (visitsByPlatform[k] || 0) + Number(n || 0);
           continue;
         }
-        const c = await store.get(b.key, { type: "json" });
+        const c = await store.get(key, { type: "json" });
         if (!c || !c.id) continue;
         if (c.is_test) continue; // exclude tagged E2E/verification rows from all North Star totals
         signups++;
