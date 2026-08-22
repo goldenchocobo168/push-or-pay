@@ -442,8 +442,34 @@
     document.getElementById("letsGo").onclick = () => renderOwnerDashboard({ ...d, prank_intro: false });
   }
 
+  function renderInviteFirst(d) {
+    const inviteUrl = location.origin + d.invite_link;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${d.partner_name}, you're my final boss on Push or Pay 😈 ${inviteUrl}`)}`;
+    app.innerHTML = `
+      <div class="panel">
+        <div class="card center">
+          <div class="emoji-xl">😈</div>
+          <h1 class="title" style="margin-bottom:8px">One more step</h1>
+          <p class="lead">Before you start, invite <b>${esc(d.partner_name)}</b> to be your final boss.</p>
+          <p class="hint" style="margin:16px 0">The game isn't fun alone. Your partner needs to be watching from day one.</p>
+          <div class="lk" style="margin:20px 0"><input readonly id="inviteInput" value="${inviteUrl}" /><button class="copy" id="copyInvite">Copy</button><a class="copy" id="waInvite" target="_blank" rel="noopener" href="${waUrl}">WhatsApp</a></div>
+          <p class="hint" style="margin:16px 0">${esc(pick(COPY.day_zero_invite))}</p>
+          <button class="btn fire block lg" id="sentInviteBtn" style="margin-top:18px">I've sent it 😈</button>
+        </div>
+      </div>`;
+    document.getElementById("copyInvite").onclick = async () => { try { await navigator.clipboard.writeText(inviteUrl); document.getElementById("copyInvite").textContent = "Copied!"; setTimeout(() => document.getElementById("copyInvite").textContent = "Copy", 2000); } catch (e) { toast("Copy failed — select the link manually"); } };
+    document.getElementById("waInvite").onclick = () => { api("invite_click", { channel: "whatsapp_dashboard" }).catch(() => {}); };
+    document.getElementById("sentInviteBtn").onclick = () => renderOwnerDashboard(d);
+  }
+
   function render(d) {
-    if (d.role === "owner") { if (d.prank_intro) return renderPrankIntro(d); if (d.secret_reveal) return renderSecretReveal(d); return renderOwnerDashboard(d); }
+    if (d.role === "owner") {
+      if (d.prank_intro) return renderPrankIntro(d);
+      if (d.secret_reveal) return renderSecretReveal(d);
+      // Show invite-first screen for brand new users (streak=0, no sessions, partner not accepted)
+      if (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0) && !d.accepted) return renderInviteFirst(d);
+      return renderOwnerDashboard(d);
+    }
     if (d.accepted) return renderWatcher(d);
     return renderInvitation(d);
   }
