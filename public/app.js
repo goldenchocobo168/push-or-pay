@@ -466,8 +466,6 @@
     if (d.role === "owner") {
       if (d.prank_intro) return renderPrankIntro(d);
       if (d.secret_reveal) return renderSecretReveal(d);
-      // Show invite-first screen for brand new users (streak=0, no sessions, partner not accepted)
-      if (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0) && !d.accepted) return renderInviteFirst(d);
       return renderOwnerDashboard(d);
     }
     if (d.accepted) return renderWatcher(d);
