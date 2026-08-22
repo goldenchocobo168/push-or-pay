@@ -95,8 +95,9 @@
     const banner = d.lazy_tax_update
       ? `<div class="card banner"><div>🚨 <b>${esc(d.partner_name)}</b> raised your Lazy Tax<br/><span class="big">${esc(d.lazy_tax_update.from)} → ${esc(d.lazy_tax_update.to)}</span><div class="hint">${esc(pick(COPY.lazy_tax_raised))}</div></div><button class="btn ghost" id="ackBtn">Got it 😤</button><button class="btn fire" id="shareTaxBtn" style="margin-top:8px">Screenshot this 📸</button></div>` : "";
     // Day-0 nudge: activate users who signed up but never started (streak=0 + sessions=0)
+    // Made more prominent with emoji, larger text, and urgent styling to combat 76% drop-off
     const dayZeroNudge = (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0))
-      ? `<div class="card banner" style="background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)"><div style="font-size:18px;margin-bottom:8px">🚨 <b>Day 1 waiting</b></div><div style="font-size:16px;margin-bottom:12px">${esc(pick(COPY.first_session_nudge))}</div><button class="btn ghost" id="startFromNudgeBtn" style="background:rgba(255,255,255,0.2)">Start now 💪</button></div>` : "";
+      ? `<div class="card banner" style="background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);border:2px solid #ff4757;box-shadow:0 4px 20px rgba(255,107,107,0.4)"><div style="font-size:20px;margin-bottom:12px;font-weight:bold">🚨 DAY 1 WAITING</div><div style="font-size:18px;margin-bottom:16px;line-height:1.4">${esc(pick(COPY.first_session_nudge))}</div><button class="btn fire block" id="startFromNudgeBtn" style="background:rgba(255,255,255,0.95);color:#ee5a6f;font-weight:bold;padding:14px 20px;border-radius:8px">Start now 💪</button></div>` : "";
     const streakJoke = (d.streak === 0 && d.missed_count > 0) ? esc(pick(COPY.skip)) : esc(pick(COPY.dashboard));
     // One session away from the first-ever "active pair" (partner joined + 3 logged
     // days) — a real habit milestone that's otherwise invisible to the user.
@@ -441,15 +442,49 @@
     document.getElementById("letsGo").onclick = () => renderOwnerDashboard({ ...d, prank_intro: false });
   }
 
+  function renderInviteFirst(d) {
+    const inviteUrl = location.origin + d.invite_link;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${d.partner_name}, you're my final boss on Push or Pay 😈 ${inviteUrl}`)}`;
+    app.innerHTML = `
+      <div class="panel">
+        <div class="card center">
+          <div class="emoji-xl">😈</div>
+          <h1 class="title" style="margin-bottom:8px">One more step</h1>
+          <p class="lead">Before you start, invite <b>${esc(d.partner_name)}</b> to be your final boss.</p>
+          <p class="hint" style="margin:16px 0">The game isn't fun alone. Your partner needs to be watching from day one.</p>
+          <div class="lk" style="margin:20px 0"><input readonly id="inviteInput" value="${inviteUrl}" /><button class="copy" id="copyInvite">Copy</button><a class="copy" id="waInvite" target="_blank" rel="noopener" href="${waUrl}">WhatsApp</a></div>
+          <p class="hint" style="margin:16px 0">${esc(pick(COPY.day_zero_invite))}</p>
+          <button class="btn fire block lg" id="sentInviteBtn" style="margin-top:18px">I've sent it 😈</button>
+        </div>
+      </div>`;
+    document.getElementById("copyInvite").onclick = async () => { try { await navigator.clipboard.writeText(inviteUrl); document.getElementById("copyInvite").textContent = "Copied!"; setTimeout(() => document.getElementById("copyInvite").textContent = "Copy", 2000); } catch (e) { toast("Copy failed — select the link manually"); } };
+    document.getElementById("waInvite").onclick = () => { api("invite_click", { channel: "whatsapp_dashboard" }).catch(() => {}); };
+    document.getElementById("sentInviteBtn").onclick = () => renderOwnerDashboard(d);
+  }
+
   function render(d) {
-    if (d.role === "owner") { if (d.prank_intro) return renderPrankIntro(d); if (d.secret_reveal) return renderSecretReveal(d); return renderOwnerDashboard(d); }
+    if (d.role === "owner") {
+      if (d.prank_intro) return renderPrankIntro(d);
+      if (d.secret_reveal) return renderSecretReveal(d);
+      // Show invite-first screen for brand new users (streak=0, no sessions, partner not accepted)
+      if (d.streak === 0 && (!d.sessions || Object.keys(d.sessions).length === 0) && !d.accepted) return renderInviteFirst(d);
+      return renderOwnerDashboard(d);
+    }
     if (d.accepted) return renderWatcher(d);
     return renderInvitation(d);
   }
 
   if (!id || !token) { app.innerHTML = errHtml("This link is missing its access token. Ask for the full link."); return; }
+  const startParam = new URLSearchParams(location.search).get("start");
   Promise.all([fetch("/copy.json").then(r => r.json()).catch(() => ({})), api("get")]).then(([c, d]) => {
-    COPY = c; seed = (d.missed_count || 0) + (d.streak || 0); render(d);
+    COPY = c; seed = (d.missed_count || 0) + (d.streak || 0);
+    if (startParam === "first" && d.role === "owner") {
+      render(d); // render dashboard first to initialize state
+      // Trigger session logging immediately after a brief delay
+      setTimeout(() => renderSession(d), 500);
+    } else {
+      render(d);
+    }
   }).catch((e) => { app.innerHTML = errHtml(e.message); });
   function errHtml(m) { return `<p class="msg err">${esc(m)}</p><p class="msg"><a href="/">Start a challenge →</a></p>`; }
 })();
